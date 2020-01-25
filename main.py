@@ -52,7 +52,6 @@ def fetch(key, data):
 def build(total, part):
     gconfig = get_config()
     gschema = get_schema()
-    cnt = 0
     for fn in glob.glob('./data/events/*.json'):
         fn_date = datetime.strptime(fn, './data/events/%Y-%m-%d-%H.json')
         inc_path = fn_date.strftime('./data/graph/_%Y-%m-%d-%H.txt')
@@ -95,11 +94,6 @@ def build(total, part):
                                 fw.write(f"{e['type']}\t")
                                 fw.write(f"/{entity['v2']['type']}/{v2['id']}\t")
                                 fw.write(f"{e['created_at']}\n")
-
-                                cnt += 1
-
-                            if cnt % 1e5 == 0:
-                                print(cnt)
 
             os.rename(inc_path, com_path)
 
