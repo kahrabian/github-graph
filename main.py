@@ -105,8 +105,8 @@ def build(total, part):
 
 
 if __name__ == '__main__':
-    total_threads = int(os.environ('TOTAL_THREADS', '36'))
-    task_id = int(os.environ('SLURM_ARRAY_TASK_ID', '-1'))
+    total_threads = int(os.getenv('TOTAL_THREADS', '36'))
+    task_id = int(os.getenv('SLURM_ARRAY_TASK_ID', '-1'))
     for i in range(task_id * 2, (task_id + 1) * 2):
         t = threading.Thread(target=build, args=(total_threads, i))
         t.start()
