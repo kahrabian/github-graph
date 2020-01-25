@@ -44,8 +44,11 @@ def get_schema():
 def fetch(key, data):
     steps = key.split('.')
     data = data.copy()
-    for step in steps:
-        data = data[step]
+    try:
+        for step in steps:
+            data = data[step]
+    except KeyError:
+        return ''
     return data
 
 
