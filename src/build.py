@@ -7,16 +7,16 @@ from datetime import datetime
 
 
 def get_config():
-    from configs import commit_comment as cfg_commit_comment
-    from configs import fork as cfg_fork
-    from configs import issue_comment as cfg_issue_comment
-    from configs import issues as cfg_issues
-    from configs import member as cfg_member
-    from configs import pull_request_review_comment as cfg_pull_request_review_comment
-    from configs import pull_request_review as cfg_pull_request_review
-    from configs import pull_request as cfg_pull_request
-    from configs import push as cfg_push
-    from configs import star as cfg_star
+    from configs.graph import commit_comment as cfg_commit_comment
+    from configs.graph import fork as cfg_fork
+    from configs.graph import issue_comment as cfg_issue_comment
+    from configs.graph import issues as cfg_issues
+    from configs.graph import member as cfg_member
+    from configs.graph import pull_request_review_comment as cfg_pull_request_review_comment
+    from configs.graph import pull_request_review as cfg_pull_request_review
+    from configs.graph import pull_request as cfg_pull_request
+    from configs.graph import push as cfg_push
+    from configs.graph import star as cfg_star
 
     config = {}
     config.update(cfg_commit_comment.config)
@@ -34,7 +34,7 @@ def get_config():
 
 
 def get_schema():
-    from configs import schema as cfg_schema
+    from configs.graph import schema as cfg_schema
 
     schema = cfg_schema.schema
 

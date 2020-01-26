@@ -11,4 +11,4 @@
 source ~/venvs/gg/bin/activate
 
 export TOTAL_THREADS=36
-python build.py
+python src/build.py

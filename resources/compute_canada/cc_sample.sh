@@ -15,4 +15,4 @@ export SP_TM=2020-01-01-00
 export IN_SZ=2000
 export TG_SZ=2000000
 export SMPL_RT=2000
-python sample.py
+python src/sample.py
