@@ -22,6 +22,11 @@ def _extract(g, lk, trd_cnt, prt):
                         g[v1] = set()
                     g[v1].add(v2)
 
+                    # NOTE: To find nodes with the most interactions
+                    if v2 not in g:
+                        g[v2] = set()
+                    g[v2].add(v1)
+
 
 def extract():
     g = {}
