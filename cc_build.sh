@@ -7,7 +7,8 @@
 #SBATCH --array=0-35
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=kian.ahrabian@mail.mcgill.ca
-#SBATCH --export=TOTAL_THREADS=36
 
 source ~/venvs/gg/bin/activate
+
+export TOTAL_THREADS=36
 python build.py
