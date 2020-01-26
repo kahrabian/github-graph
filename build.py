@@ -56,10 +56,10 @@ def build(total, part):
     gconfig = get_config()
     gschema = get_schema()
     for fn in glob.glob('./data/events/*.json'):
-        fn_date = datetime.strptime(fn, './data/events/%Y-%m-%d-%H.json')
-        inc_path = fn_date.strftime('./data/graph/_%Y-%m-%d-%H.txt')
-        com_path = fn_date.strftime('./data/graph/%Y-%m-%d-%H.txt')
-        if fn_date.timetuple().tm_yday % total != part or os.path.exists(com_path):
+        fn_time = datetime.strptime(fn, './data/events/%Y-%m-%d-%H.json')
+        inc_path = fn_time.strftime('./data/graph/_%Y-%m-%d-%H.txt')
+        com_path = fn_time.strftime('./data/graph/%Y-%m-%d-%H.txt')
+        if fn_time.timetuple().tm_yday % total != part or os.path.exists(com_path):
             continue
         with open(fn, 'r') as fr:
             with open(inc_path, 'w') as fw:
@@ -97,14 +97,18 @@ def build(total, part):
                                 fw.write(f"{e['type']}\t")
                                 fw.write(f"/{entity['v2']['type']}/{v2['id']}\t")
                                 fw.write(f"{e['created_at']}\n")
-
             os.rename(inc_path, com_path)
 
 
-if __name__ == '__main__':
+def main():
     total_threads = int(os.getenv('TOTAL_THREADS', '36'))
     task_id = int(os.getenv('SLURM_ARRAY_TASK_ID', '-1'))
     for i in range(task_id * 2, (task_id + 1) * 2):
         t = threading.Thread(target=build, args=(total_threads, i))
         t.start()
         t.join()
+
+
+if __name__ == '__main__':
+    main()
+    exit(0)
