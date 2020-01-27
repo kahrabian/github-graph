@@ -13,10 +13,10 @@ from queue import PriorityQueue
 from threading import Lock, Thread
 
 
-def _extract(g, md, lk, trd_cnt, prt):
+def _extract(g, lk, trd_cnt, prt):
+    sd = 'graph' if os.getenv('MD', 'G') == 'G' else 'sample'
     st_tm = datetime.strptime(os.getenv('ST_TM', ''), '%Y-%m-%d-%H')
     sp_tm = datetime.strptime(os.getenv('SP_TM', ''), '%Y-%m-%d-%H')
-    sd = 'graph' if md == 'G' else 'sample'
     for fn in glob.glob(f'./data/{sd}/*.txt'):
         fn_tm = datetime.strptime(fn, f'./data/{sd}/%Y-%m-%d-%H.txt')
         if fn_tm < st_tm or fn_tm > sp_tm or fn_tm.hour % trd_cnt != prt:
@@ -38,10 +38,9 @@ def _extract(g, md, lk, trd_cnt, prt):
 def extract():
     g = {}
     lk = Lock()
-    trd_cnt = int(os.getenv('TRD_CNT', '16'))
-    md = os.getenv('MD', 'G')
+    trd_cnt = int(os.getenv('TRD_CNT', '8'))
     for i in range(0, trd_cnt):
-        t = Thread(target=_extract, args=(g, md, lk, trd_cnt, i))
+        t = Thread(target=_extract, args=(g, lk, trd_cnt, i))
         t.start()
         t.join()
     return g
@@ -64,7 +63,7 @@ def transform(g):
     tg = {}
     lk = Lock()
     gk = sorted(g.keys())
-    trd_cnt = int(os.getenv('TRD_CNT', '16'))
+    trd_cnt = int(os.getenv('TRD_CNT', '8'))
     for i in range(0, trd_cnt):
         t = Thread(target=_transform, args=(tg, g, gk, lk, trd_cnt, i))
         t.start()
@@ -111,7 +110,7 @@ def bfs(g, tg):
     viz_g = {}
     lk = Lock()
     viz_d = int(os.getenv('VIZ_D', '3'))
-    trd_cnt = int(os.getenv('TRD_CNT', '16'))
+    trd_cnt = int(os.getenv('TRD_CNT', '8'))
     for i in range(0, trd_cnt):
         t = Thread(target=_bfs, args=(viz_g, g, viz_pl, viz_d, trd_cnt, i))
         t.start()
@@ -154,7 +153,7 @@ def build(viz_g):
     plt_g = []
     lk = Lock()
     viz_gk = sorted(viz_g.keys())
-    trd_cnt = int(os.getenv('TRD_CNT', '16'))
+    trd_cnt = int(os.getenv('TRD_CNT', '8'))
     for i in range(0, trd_cnt):
         t = Thread(target=_build, args=(plt_g, viz_g, viz_gk, cm, lk, trd_cnt, i))
         t.start()
