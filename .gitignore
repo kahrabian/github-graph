@@ -176,3 +176,5 @@ dmypy.json
 
 data/
 results/
+resources/compute_canada/
+!resources/compute_canada/*.template.sh
