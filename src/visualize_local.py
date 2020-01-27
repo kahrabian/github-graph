@@ -12,11 +12,12 @@ from queue import PriorityQueue
 from threading import Lock, Thread
 
 
-def _extract(g, lk, trd_cnt, prt):
+def _extract(g, md, lk, trd_cnt, prt):
     st_tm = datetime.strptime(os.getenv('ST_TM', ''), '%Y-%m-%d-%H')
     sp_tm = datetime.strptime(os.getenv('SP_TM', ''), '%Y-%m-%d-%H')
-    for fn in glob.glob('./data/graph/*.txt'):
-        fn_tm = datetime.strptime(fn, './data/graph/%Y-%m-%d-%H.txt')
+    sd = 'graph' if md == 'G' else 'sample'
+    for fn in glob.glob(f'./data/{sd}/*.txt'):
+        fn_tm = datetime.strptime(fn, f'./data/{sd}/%Y-%m-%d-%H.txt')
         if fn_tm < st_tm or fn_tm > sp_tm or fn_tm.hour % trd_cnt != prt:
             continue
         with open(fn, 'r') as fr:
@@ -37,8 +38,9 @@ def extract():
     g = {}
     lk = Lock()
     trd_cnt = int(os.getenv('TRD_CNT', '16'))
+    md = os.getenv('MD', 'G')
     for i in range(0, trd_cnt):
-        t = Thread(target=_extract, args=(g, lk, trd_cnt, i))
+        t = Thread(target=_extract, args=(g, md, lk, trd_cnt, i))
         t.start()
         t.join()
     return g
@@ -117,7 +119,7 @@ def bfs(g, tg):
     return viz_g
 
 
-def _build(plt_g, viz_g, viz_gk, gp, cm, lk, trd_cnt, prt):
+def _build(plt_g, viz_g, viz_gk, cm, lk, trd_cnt, prt):
     for i, k in enumerate(viz_gk):
         if i % trd_cnt != prt:
             continue
@@ -125,7 +127,7 @@ def _build(plt_g, viz_g, viz_gk, gp, cm, lk, trd_cnt, prt):
         tp_rx = re.compile(r'/(.*)/.*')
         for v in set(itertools.chain.from_iterable(viz_g[k])):
             tp = re.findall(tp_rx, v)[0]
-            vs.append((v, {'group': gp[tp], 'color': cm[tp]}))
+            vs.append((v, {'color': cm[tp]}))
 
         net = nx.Graph()
         net.add_nodes_from(vs)
@@ -138,10 +140,8 @@ def build(viz_g):
     from configs.graph import schema as cfg_schema
 
     cm = {}
-    gp = {}
     cp = ['#111d5e', '#46b5d1', '#b21f66', '#f65c78', '#2d334a', '#c3f584', '#ff7315', '#ffd271', '#fff3af']
     for i, tp in enumerate(sorted(cfg_schema.schema.keys())):
-        gp[tp] = i
         cm[tp] = cp[i]
 
     plt_g = []
@@ -149,7 +149,7 @@ def build(viz_g):
     viz_gk = sorted(viz_g.keys())
     trd_cnt = int(os.getenv('TRD_CNT', '16'))
     for i in range(0, trd_cnt):
-        t = Thread(target=_build, args=(plt_g, viz_g, viz_gk, gp, cm, lk, trd_cnt, i))
+        t = Thread(target=_build, args=(plt_g, viz_g, viz_gk, cm, lk, trd_cnt, i))
         t.start()
         t.join()
     return plt_g
@@ -167,8 +167,9 @@ def plot(plt_g):
         fig = plt.figure(figsize=(100, 100))
         ax = fig.add_subplot(111)
 
+        nc = [net.nodes[v]['color'] for v in net]
         pos = nx.fruchterman_reingold_layout(net)
-        nx.draw_networkx(net, pos)
+        nx.draw_networkx(net, pos, node_color=nc)
 
         plt.tight_layout()
         plt.savefig(f'{dir_pth}/{pk}_{d}.png', format='PNG')
