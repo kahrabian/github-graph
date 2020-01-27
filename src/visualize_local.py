@@ -88,10 +88,9 @@ def _bfs(viz_g, g, viz_pl, viz_d, trd_cnt, prt):
             if d > viz_d:
                 continue
             vs.add(v)
-            for n in g[v]:
-                if n not in mk:
-                    mk.add(n)
-                    q.put((n, d + 1))
+            for n in g[v] - mk:
+                mk.add(n)
+                q.put((n, d + 1))
 
         k = f'{dx}_{tp}_{pk}'
         for v in vs:

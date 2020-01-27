@@ -12,7 +12,7 @@ source ~/venvs/gg/bin/activate
 export TRD_CNT=32
 export ST_TM=2019-12-01-00
 export SP_TM=2020-01-01-00
-export VIZ_CNT=10
-export VIZ_D=10
-export MD=G
+export VIZ_CNT=5
+export VIZ_D=5
+export MD=S
 python src/visualize_local.py

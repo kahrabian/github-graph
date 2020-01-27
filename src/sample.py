@@ -44,18 +44,17 @@ def _sample(g, in_sz, tg_sz, smpl_rt):
     q = PriorityQueue()
     for _, v in sorted(map(lambda x: (len(x[1]), x[0]), g.items()), reverse=True)[:in_sz]:
         mk.add(v)
-        q.put((len(g[v]), v))
+        q.put((-len(g[v]), v))
 
     vs = set()
     while not q.empty() and len(vs) < tg_sz:
         _, v = q.get()
         vs.add(v)
 
-        ss = g.get(v, set()) - vs
+        ss = g.get(v, set()) - mk
         for n in random.sample(ss, min(len(ss), smpl_rt)):
-            if n not in mk:
-                mk.add(n)
-                q.put((len(g.get(n, [])), n))
+            mk.add(n)
+            q.put((-len(g.get(n, [])), n))
     return vs
 
 
