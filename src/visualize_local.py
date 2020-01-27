@@ -1,5 +1,6 @@
 import glob
 import itertools
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import networkx as nx
 import os
@@ -122,15 +123,22 @@ def _build(plt_g, viz_g, viz_gk, cm, lk, trd_cnt, prt):
     for i, k in enumerate(viz_gk):
         if i % trd_cnt != prt:
             continue
-        vs = []
+
         tp_rx = re.compile(r'/(.*)/.*')
+
+        vs = []
         for v in set(itertools.chain.from_iterable(viz_g[k])):
             tp = re.findall(tp_rx, v)[0]
             vs.append((v, {'color': cm[tp]}))
 
+        es = []
+        for v, u in viz_g[k]:
+            tp = re.findall(tp_rx, v)[0]
+            es.append((v, u, {'color': cm[tp]}))
+
         net = nx.Graph()
         net.add_nodes_from(vs)
-        net.add_edges_from(viz_g[k])
+        net.add_edges_from(es)
 
         plt_g.append((net, k))
 
@@ -139,7 +147,7 @@ def build(viz_g):
     from configs.graph import schema as cfg_schema
 
     cm = {}
-    cp = ['#111d5e', '#46b5d1', '#b21f66', '#f65c78', '#2d334a', '#c3f584', '#ff7315', '#ffd271', '#fff3af']
+    cp = ['#f0134d', '#ffcc00', '#f5f0e3', '#c0ffb3', '#05dfd7', '#d89cf6', '#ffb6b9', '#ff4d00', '#be7575']
     for i, tp in enumerate(sorted(cfg_schema.schema.keys())):
         cm[tp] = cp[i]
 
@@ -151,11 +159,11 @@ def build(viz_g):
         t = Thread(target=_build, args=(plt_g, viz_g, viz_gk, cm, lk, trd_cnt, i))
         t.start()
         t.join()
-    return plt_g
+    return plt_g, cm
 
 
-def plot(plt_g):
-    for net, k in plt_g:
+def plot(plt_g, cm):
+    for net, k in sorted(plt_g, key=lambda x: x[0].number_of_nodes()):
         tp_rx = re.compile(r'([^_]*)_(.*)_([^_]*)')
         d, tp, pk = re.findall(tp_rx, k)[0]
 
@@ -165,10 +173,25 @@ def plot(plt_g):
 
         fig = plt.figure(figsize=(100, 100))
         ax = fig.add_subplot(111)
+        ax.set_facecolor('black')
 
-        nc = [net.nodes[v]['color'] for v in net]
+        nc = [d['color'] for _, d in net.nodes(data=True)]
+        ec = [d['color'] for _, _, d in net.edges(data=True)]
         pos = nx.fruchterman_reingold_layout(net)
-        nx.draw_networkx(net, pos, node_color=nc)
+        nx.draw_networkx(net,
+                         pos,
+                         node_size=600,
+                         node_color=nc,
+                         edgecolors='white',
+                         linewidths=2.0,
+                         edge_color=ec,
+                         width=2.0,
+                         with_labels=False)
+
+        plt.legend(framealpha=0.5,
+                   loc='upper left',
+                   prop={'size': 48},
+                   handles=[mpl.lines.Line2D([], [], linewidth=20, label=k, color=v) for k, v in cm.items()])
 
         plt.tight_layout()
         plt.savefig(f'{dir_pth}/{pk}_{d}.png', format='PNG')
@@ -178,8 +201,8 @@ def main():
     g = extract()
     tg = transform(g)
     viz_g = bfs(g, tg)
-    plt_g = build(viz_g)
-    plot(plt_g)
+    plt_g, cm = build(viz_g)
+    plot(plt_g, cm)
 
 
 if __name__ == '__main__':
