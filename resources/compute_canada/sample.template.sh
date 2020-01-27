@@ -3,7 +3,7 @@
 #SBATCH --job-name=gg-sample
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=16G
-#SBATCH --time=0:30:00
+#SBATCH --time=30:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=kian.ahrabian@mail.mcgill.ca
 
