@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH --account=def-jinguo
-#SBATCH --job-name=gg-sample
+#SBATCH --job-name=gg-visualize_local
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=128G
-#SBATCH --time=0:30:00
+#SBATCH --time=2:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=kian.ahrabian@mail.mcgill.ca
 
