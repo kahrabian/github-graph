@@ -1,3 +1,4 @@
 ipython
 networkx
 matplotlib
+scipy
