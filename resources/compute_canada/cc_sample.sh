@@ -12,7 +12,7 @@ source ~/venvs/gg/bin/activate
 export TRD_CNT=16
 export ST_TM=2019-12-01-00
 export SP_TM=2020-01-01-00
-export IN_SZ=100000
+export IN_SZ=100
 export TG_SZ=10000000
-export SMPL_RT=10000
+export SMPL_RT=100
 python src/sample.py
