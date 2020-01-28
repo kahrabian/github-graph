@@ -7,7 +7,7 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=kian.ahrabian@mail.mcgill.ca
 
-source ~/venvs/gg/bin/activate
+source activate gg
 
 export TRD_CNT=16
 export ST_TM=2019-12-01-00

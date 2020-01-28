@@ -8,7 +8,7 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=kian.ahrabian@mail.mcgill.ca
 
-source ~/venvs/gg/bin/activate
+source activate gg
 
 export TOTAL_THREADS=36
 python src/build.py
