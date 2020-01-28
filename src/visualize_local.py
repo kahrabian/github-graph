@@ -105,7 +105,10 @@ def bfs(g, tg):
     viz_cnt = int(os.getenv('VIZ_CNT', '10'))
     viz_pl = []
     for k, v in tg.items():
-        viz_pl += sorted(v, reverse=True)[:viz_cnt]
+        sv = sorted(v, reverse=True)
+        viz_pl += sv[-viz_cnt:]
+        viz_pl += sv[(len(sv) - viz_cnt) // 2:(len(sv) - viz_cnt) // 2 + viz_cnt]
+        viz_pl += sv[:viz_cnt]
 
     viz_g = {}
     lk = Lock()
@@ -167,6 +170,10 @@ def plot(plt_g, cm):
         d, tp, pk = re.findall(tp_rx, k)[0]
 
         dir_pth = f'./results/visualizations/local/{tp}'
+
+        if os.path.exists(f'{dir_pth}/{d}_{pk}.png'):
+            continue
+
         if not os.path.isdir(dir_pth):
             os.mkdir(dir_pth)
 
@@ -193,7 +200,8 @@ def plot(plt_g, cm):
                    handles=[mpl.lines.Line2D([], [], linewidth=20, label=k, color=v) for k, v in cm.items()])
 
         plt.tight_layout()
-        plt.savefig(f'{dir_pth}/{pk}_{d}.png', format='PNG')
+        plt.savefig(f'{dir_pth}/{d}_{pk}.png', format='PNG')
+        plt.close(fig)
 
 
 def main():

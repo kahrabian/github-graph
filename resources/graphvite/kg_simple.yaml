@@ -2,43 +2,38 @@ application:
   knowledge graph
 
 resource:
-  gpus: [0, 1]
-  cpu_per_gpu: auto
+  gpus: [0, 1, 2, 4]
+  cpu_per_gpu: 4
   dim: 512
 
 format:
-  delimiters: '\t'
+  delimiters: "\t"
 
 graph:
   file_name: ./data/split/train_s.txt
-  as_undirected: true
-  normalization: true
 
 build:
   optimizer:
-    type: SGD
-    lr: 1.0
-    weight_decay: 0
-  num_partition: auto
+    type: Adam
+    lr: 1.0e-3
+    weight_decay: 4.7e-7
+  num_partition: 1024
   num_negative: 64
   batch_size: 100000
-  episode_size: auto
+  episode_size: 100
 
 train:
   model: SimplE
-  num_epoch: 2000
-  relation_lr_multiplier: 1
+  num_epoch: 4000
   l3_regularization: 2.0e-3
-  sample_batch_size: 2000
+  sample_batch_size: 1000
   adversarial_temperature: 2
   relation_lr_multiplier: 1.0e-4
-  log_frequency: 500
+  log_frequency: 400
 
 evaluate:
   - task: link prediction
     file_name: ./data/split/train_u.txt
-    target: both
-    backend: graphvite
 
 save:
   file_name: ./results/knowledge_graph_embedding/simple.pkl
