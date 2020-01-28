@@ -19,7 +19,7 @@ def _extract(g, lk, trd_cnt, prt):
     sp_tm = datetime.strptime(os.getenv('SP_TM', ''), '%Y-%m-%d-%H')
     for fn in glob.glob(f'./data/{sd}/*.txt'):
         fn_tm = datetime.strptime(fn, f'./data/{sd}/%Y-%m-%d-%H.txt')
-        if fn_tm < st_tm or fn_tm > sp_tm or fn_tm.hour % trd_cnt != prt:
+        if fn_tm < st_tm or fn_tm > sp_tm or fn_tm.timetuple().tm_yday % trd_cnt != prt:
             continue
         with open(fn, 'r') as fr:
             for l in fr.readlines():
