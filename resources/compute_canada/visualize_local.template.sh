@@ -13,6 +13,6 @@ export TRD_CNT=8
 export MD=S
 export ST_TM=2019-12-01-00
 export SP_TM=2020-01-01-00
-export VIZ_CNT=3
-export VIZ_D=3
+export VIZ_CNT=2
+export VIZ_D=2
 python src/visualize_local.py
