@@ -178,3 +178,6 @@ data/
 results/
 resources/compute_canada/
 !resources/compute_canada/*.template.sh
+
+resources/graphvite/
+!resources/graphvite/*.template.sh

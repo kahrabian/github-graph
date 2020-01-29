@@ -12,4 +12,5 @@
 
 source activate gg
 
+cat ./resources/graphvite/kg_simple.yaml
 graphvite run ./resources/graphvite/kg_simple.yaml
