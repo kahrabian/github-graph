@@ -2,7 +2,7 @@ application:
   knowledge graph
 
 resource:
-  gpus: [0, 1, 2, 4]
+  gpus: [0, 1, 2, 3]
   cpu_per_gpu: 4
   dim: 512
 
