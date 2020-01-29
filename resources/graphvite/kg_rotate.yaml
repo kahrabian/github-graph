@@ -3,7 +3,7 @@ application:
 
 resource:
   gpus: [0, 1, 2, 3]
-  cpu_per_gpu: auto
+  cpu_per_gpu: 7
   dim: 512
 
 format:
@@ -14,27 +14,28 @@ graph:
 
 build:
   optimizer:
-    type: SGD
-    lr: 1.0e-2
-    weight_decay: 5e-7
-  num_partition: auto
+    type: Adam
+    lr: 1.0e-5
+    weight_decay: 1.0e-9
+  num_partition: 16
   num_negative: 64
   batch_size: 100000
-  episode_size: 200
+  episode_size: 30
 
 train:
   model: RotatE
-  num_epoch: 1000
+  num_epoch: 5000
   margin: 6
   sample_batch_size: 2000
-  adversarial_temperature: 0.2
+  adversarial_temperature: 2
   relation_lr_multiplier: 1
-  log_frequency: 500
+  log_frequency: 1200
 
 evaluate:
   - task: link prediction
     file_name: ./data/split/train_u.txt
+    # fast_mode: 10000
 
 save:
-  file_name: ./results/knowledge_graph_embedding/rotate.pkl
+  file_name: ./results/graphvite/knowledge_graph_embedding/rotate.pkl
   save_hyperparameter: true
