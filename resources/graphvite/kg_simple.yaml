@@ -3,7 +3,7 @@ application:
 
 resource:
   gpus: [0, 1, 2, 3]
-  cpu_per_gpu: 4
+  cpu_per_gpu: 7
   dim: 512
 
 format:
