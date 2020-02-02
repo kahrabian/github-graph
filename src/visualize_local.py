@@ -5,11 +5,9 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import os
 import queue
-import random
 import re
 
 from datetime import datetime
-from queue import PriorityQueue
 from threading import Lock, Thread
 
 
