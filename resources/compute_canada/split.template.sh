@@ -11,9 +11,5 @@ source activate gg
 
 export TRD_CNT=8
 export MD=S
-export ST_TM=2019-12-01-00
-export TR_TM=2019-12-22-00
-export VD_TM=2019-12-27-00
-export SP_TM=2020-01-01-00
-export TP=U_SE_C_I
+export TPS=U_SE_C_I
 python src/split.py
