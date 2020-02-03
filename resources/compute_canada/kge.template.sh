@@ -7,6 +7,7 @@
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=196608M
 #SBATCH --time=24:00:00
+#SBATCH --output=./logs/%x-%j.out
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=kian.ahrabian@mail.mcgill.ca
 

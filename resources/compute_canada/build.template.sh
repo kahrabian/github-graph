@@ -5,6 +5,7 @@
 #SBATCH --mem=1G
 #SBATCH --time=1:00:00
 #SBATCH --array=0-35
+#SBATCH --output=./logs/%x-%j.out
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=kian.ahrabian@mail.mcgill.ca
 
