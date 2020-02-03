@@ -2,9 +2,9 @@ application:
   knowledge graph
 
 resource:
-  gpus: [0, 1, 2, 3]
-  cpu_per_gpu: 7
-  dim: 512
+  gpus: [0, 1]
+  cpu_per_gpu: 4
+  dim: 256
 
 format:
   delimiters: "\t"
@@ -25,17 +25,22 @@ build:
 train:
   model: RotatE
   num_epoch: 5000
+  relation_lr_multiplier: 1
   margin: 6
   sample_batch_size: 2000
   adversarial_temperature: 2
-  relation_lr_multiplier: 1
-  log_frequency: 1200
+  log_frequency: 1000
 
 evaluate:
   - task: link prediction
-    file_name: ./data/split/train_u.txt
+    file_name: ./data/split/valid_s.txt
+    target: head
     # fast_mode: 10000
+  # - task: link prediction
+  #   file_name: ./data/split/of_s.txt
+  #   target: head
+  #   fast_mode: 10000
 
 save:
-  file_name: ./results/graphvite/knowledge_graph_embedding/rotate.pkl
+  file_name: ./results/graphvite/knowledge_graph_embedding/r_rotate_256_6.pkl
   save_hyperparameter: true

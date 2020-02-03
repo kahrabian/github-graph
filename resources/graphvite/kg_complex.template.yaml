@@ -23,11 +23,11 @@ build:
   episode_size: 30
 
 train:
-  model: SimplE
+  model: ComplEx
   num_epoch: 5000
   relation_lr_multiplier: 1
   l3_regularization: 2.0e-3
-  sample_batch_size: 1000
+  sample_batch_size: 2000
   adversarial_temperature: 2
   log_frequency: 1000
 
@@ -42,5 +42,5 @@ evaluate:
   #   fast_mode: 10000
 
 save:
-  file_name: ./results/graphvite/knowledge_graph_embedding/r_simple_1_2e-3.pkl
+  file_name: ./results/graphvite/knowledge_graph_embedding/r_complex_1_2e-3.pkl
   save_hyperparameter: true
