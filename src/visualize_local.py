@@ -37,9 +37,12 @@ def extract():
     g = {}
     lk = Lock()
     trd_cnt = int(os.getenv('TRD_CNT', '8'))
+    ts = []
     for i in range(0, trd_cnt):
         t = Thread(target=_extract, args=(g, lk, trd_cnt, i))
         t.start()
+        ts.append(t)
+    for t in ts:
         t.join()
     return g
 
@@ -62,9 +65,12 @@ def transform(g):
     lk = Lock()
     gk = sorted(g.keys())
     trd_cnt = int(os.getenv('TRD_CNT', '8'))
+    ts = []
     for i in range(0, trd_cnt):
         t = Thread(target=_transform, args=(tg, g, gk, lk, trd_cnt, i))
         t.start()
+        ts.append(t)
+    for t in ts:
         t.join()
     return tg
 
@@ -112,9 +118,12 @@ def bfs(g, tg):
     lk = Lock()
     viz_d = int(os.getenv('VIZ_D', '3'))
     trd_cnt = int(os.getenv('TRD_CNT', '8'))
+    ts = []
     for i in range(0, trd_cnt):
         t = Thread(target=_bfs, args=(viz_g, g, viz_pl, viz_d, trd_cnt, i))
         t.start()
+        ts.append(t)
+    for t in ts:
         t.join()
     return viz_g
 
@@ -155,9 +164,12 @@ def build(viz_g):
     lk = Lock()
     viz_gk = sorted(viz_g.keys())
     trd_cnt = int(os.getenv('TRD_CNT', '8'))
+    ts = []
     for i in range(0, trd_cnt):
         t = Thread(target=_build, args=(plt_g, viz_g, viz_gk, cm, lk, trd_cnt, i))
         t.start()
+        ts.append(t)
+    for t in ts:
         t.join()
     return plt_g, cm
 

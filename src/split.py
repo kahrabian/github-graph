@@ -33,9 +33,12 @@ def split():
     all_d, all_s, of_d, mk_of_d, of_s, mk_of_s = set(), set(), set(), set(), set(), set()
     tps = os.getenv('TPS', 'U_SE_C_I').split(',')
     trd_cnt = int(os.getenv('TRD_CNT', '8'))
+    ts = []
     for i in range(0, trd_cnt):
         t = Thread(target=_split, args=(all_d, all_s, of_d, mk_of_d, of_s, mk_of_s, tps, lk, trd_cnt, i))
         t.start()
+        ts.append(t)
+    for t in ts:
         t.join()
     return list(all_d), list(all_s), list(of_d), list(of_s), list(all_d - of_d), list(all_s - of_s)
 
@@ -113,9 +116,12 @@ def _build(all_d, all_s, of_d, of_s, tr_d, tr_s, lk, trd_cnt, prt):
 def build(all_d, all_s, of_d, of_s, tr_d, tr_s):
     lk = Lock()
     trd_cnt = int(os.getenv('TRD_CNT', '8'))
+    ts = []
     for i in range(0, trd_cnt):
         t = Thread(target=_build, args=(all_d, all_s, of_d, of_s, tr_d, tr_s, lk, trd_cnt, i))
         t.start()
+        ts.append(t)
+    for t in ts:
         t.join()
 
 

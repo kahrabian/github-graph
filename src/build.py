@@ -1,7 +1,7 @@
 import glob
 import json
 import os
-import threading
+from threading import Thread
 
 from datetime import datetime
 
@@ -103,9 +103,12 @@ def build(total, part):
 def main():
     total_threads = int(os.getenv('TOTAL_THREADS', '36'))
     task_id = int(os.getenv('SLURM_ARRAY_TASK_ID', '-1'))
+    ts = []
     for i in range(task_id * 2, (task_id + 1) * 2):
-        t = threading.Thread(target=build, args=(total_threads, i))
+        t = Thread(target=build, args=(total_threads, i))
         t.start()
+        ts.append(t)
+    for t in ts:
         t.join()
 
 

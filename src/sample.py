@@ -32,9 +32,12 @@ def extract():
     g = {}
     lk = Lock()
     trd_cnt = int(os.getenv('TRD_CNT', '16'))
+    ts = []
     for i in range(0, trd_cnt):
         t = Thread(target=_extract, args=(g, lk, trd_cnt, i))
         t.start()
+        ts.append(t)
+    for t in ts:
         t.join()
     return g
 
@@ -86,9 +89,12 @@ def _build(vs, trd_cnt, prt):
 
 def build(vs):
     trd_cnt = int(os.getenv('TRD_CNT', '16'))
+    ts = []
     for i in range(0, trd_cnt):
         t = Thread(target=_build, args=(vs, trd_cnt, i))
         t.start()
+        ts.append(t)
+    for t in ts:
         t.join()
 
 
