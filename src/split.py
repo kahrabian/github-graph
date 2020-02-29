@@ -6,8 +6,19 @@ from datetime import datetime
 from threading import Lock, Thread
 
 
+def _format(r):
+    tr = os.getenv('TR', 'H')
+    if tr == 'H':
+        return list(map(lambda x: (x[1], *x[0]), r.items()))
+    elif tr == 'T':
+        return list(map(lambda x: (x[0][0], x[1], *x[0][1:]), r.items()))
+    elif tr == 'B':
+        return list(map(lambda x: (x[1], *x[0][1:]), filter(lambda x: x[0][0] == 'H', r.items())))
+
+
 def _extract(nr_t, nr_s, r_t, r_s, es, rs, tps, lk, trd_cnt, prt):
     sd = 'graph' if os.getenv('MD', 'G') == 'G' else 'sample'
+    tr = os.getenv('TR', 'H')
     for fn in glob.glob(f'./data/{sd}/*.txt'):
         fn_tm = datetime.strptime(fn, f'./data/{sd}/%Y-%m-%d-%H.txt')
         if fn_tm.timetuple().tm_yday % trd_cnt != prt:
@@ -17,27 +28,33 @@ def _extract(nr_t, nr_s, r_t, r_s, es, rs, tps, lk, trd_cnt, prt):
                 r = l.strip()
                 if r == '':
                     continue
-                v1, r, v2, t = r.split('\t')
+                v1, v2, r, t = r.split('\t')
                 t = int(datetime.strptime(t, '%Y-%m-%dT%H:%M:%SZ').timestamp())
                 if r in tps:
                     with lk:
-                        if (r, v2, t) not in r_t:
-                            r_t[(r, v2, t)] = v1
+                        if tr == 'H' and (v2, r, t) not in r_t:
+                            r_t[(v2, r, t)] = v1
+                        if tr == 'T' and (v1, r, t) not in r_t:
+                            r_t[(v1, r, t)] = v2
+                        if tr == 'B' and ('H', v2, r, t) not in r_t and (v1, 'T', r, t) not in r_t:
+                            r_t[('H', v2, r, t)] = v1
+                            r_t[(v1, 'T', r, t)] = v2
                     with lk:
-                        if (r, v2) not in r_s:
-                            r_s[(r, v2)] = v1
+                        if tr == 'H' and (v2, r) not in r_s:
+                            r_s[(v2, r)] = v1
+                        if tr == 'T' and (v1, r) not in r_s:
+                            r_s[(v1, r)] = v2
+                        if tr == 'B' and ('H', v2, r) not in r_s and (v1, 'T', r) not in r_s:
+                            r_s[('H', v2, r)] = v1
+                            r_s[(v1, 'T', r)] = v2
                 else:
-                    nr_t[(v1, r, v2, t)] = True
-                    nr_s[(v1, r, v2)] = True
+                    nr_t[(v1, v2, r, t)] = True
+                    nr_s[(v1, v2, r)] = True
                 with lk:
                     es[v1] = True
                     es[v2] = True
                 with lk:
                     rs[r] = True
-
-
-def _format(r):
-    return list(map(lambda x: (x[1], *x[0]), r.items()))
 
 
 def extract():
@@ -99,9 +116,9 @@ def _write(x, pth, fn, e_idx, r_idx, lk, trd_cnt, prt):
                 continue
             with lk:
                 if len(x) == 4:
-                    fw.write(f'{e_idx[x[0]]}\t{r_idx[x[1]]}\t{e_idx[x[2]]}\t{x[3]}\n')
+                    fw.write(f'{e_idx[x[0]]}\t{e_idx[x[1]]}\t{r_idx[x[2]]}\t{x[3]}\n')
                 else:
-                    fw.write(f'{e_idx[x[0]]}\t{r_idx[x[1]]}\t{e_idx[x[2]]}\n')
+                    fw.write(f'{e_idx[x[0]]}\t{e_idx[x[1]]}\t{r_idx[x[2]]}\n')
 
 
 def _build(tr, vd, ts, pth, e_idx, r_idx, lk, trd_cnt, prt):

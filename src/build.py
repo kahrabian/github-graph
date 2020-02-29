@@ -92,8 +92,8 @@ def build(total, part):
                                     v2[feature] = fetch(key, event)
 
                                 fw.write(f"/{entity['v1']['type']}/{v1['id']}\t")
-                                fw.write(f"{e['type']}\t")
                                 fw.write(f"/{entity['v2']['type']}/{v2['id']}\t")
+                                fw.write(f"{e['type']}\t")
                                 fw.write(f"{e['created_at']}\n")
             os.rename(inc_path, com_path)
 

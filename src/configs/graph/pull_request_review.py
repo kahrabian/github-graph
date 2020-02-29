@@ -26,26 +26,26 @@ config = {
                    },
                },
            },
-           {
-               'v1': {
-                   'type': 'pr_review',
-                   'features': {
-                       'id': 'payload.review.id',
-                   },
-               },
-               'e': {
-                   'type': 'C_O_PR',
-                   'features': [
-                       'created_at',
-                   ],
-               },
-               'v2': {
-                   'type': 'commit',
-                   'features': {
-                       'id': 'payload.review.commit_id',
-                   },
-               },
-           },
+        #    {
+        #        'v1': {
+        #            'type': 'pr_review',
+        #            'features': {
+        #                'id': 'payload.review.id',
+        #            },
+        #        },
+        #        'e': {
+        #            'type': 'C_O_PR',
+        #            'features': [
+        #                'created_at',
+        #            ],
+        #        },
+        #        'v2': {
+        #            'type': 'commit',
+        #            'features': {
+        #                'id': 'payload.review.commit_id',
+        #            },
+        #        },
+        #    },
            {
                'v1': {
                    'type': 'pr_review',

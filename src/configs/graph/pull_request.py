@@ -85,46 +85,46 @@ config = {
                    },
                },
            },
-           {
-               'v1': {
-                   'type': 'commit',
-                   'features': {
-                       'id': 'payload.pull_request.base.sha',
-                   },
-               },
-               'e': {
-                   'type': 'C_BO_P',
-                   'features': [
-                       'created_at',
-                   ],
-               },
-               'v2': {
-                   'type': 'pr',
-                   'features': {
-                       'id': 'payload.pull_request.id',
-                   },
-               },
-           },
-           {
-               'v1': {
-                   'type': 'commit',
-                   'features': {
-                       'id': 'payload.pull_request.head.sha',
-                   },
-               },
-               'e': {
-                   'type': 'C_HO_P',
-                   'features': [
-                       'created_at',
-                   ],
-               },
-               'v2': {
-                   'type': 'pr',
-                   'features': {
-                       'id': 'payload.pull_request.id',
-                   },
-               },
-           },
+        #    {
+        #        'v1': {
+        #            'type': 'commit',
+        #            'features': {
+        #                'id': 'payload.pull_request.base.sha',
+        #            },
+        #        },
+        #        'e': {
+        #            'type': 'C_BO_P',
+        #            'features': [
+        #                'created_at',
+        #            ],
+        #        },
+        #        'v2': {
+        #            'type': 'pr',
+        #            'features': {
+        #                'id': 'payload.pull_request.id',
+        #            },
+        #        },
+        #    },
+        #    {
+        #        'v1': {
+        #            'type': 'commit',
+        #            'features': {
+        #                'id': 'payload.pull_request.head.sha',
+        #            },
+        #        },
+        #        'e': {
+        #            'type': 'C_HO_P',
+        #            'features': [
+        #                'created_at',
+        #            ],
+        #        },
+        #        'v2': {
+        #            'type': 'pr',
+        #            'features': {
+        #                'id': 'payload.pull_request.id',
+        #            },
+        #        },
+        #    },
            {
                'v1': {
                    'type': 'pr',
