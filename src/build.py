@@ -1,23 +1,23 @@
 import glob
 import json
 import os
+from datetime import datetime
 from threading import Thread
 
-from datetime import datetime
+from configs.graph import commit_comment as cfg_commit_comment
+from configs.graph import fork as cfg_fork
+from configs.graph import issue_comment as cfg_issue_comment
+from configs.graph import issues as cfg_issues
+from configs.graph import member as cfg_member
+from configs.graph import pull_request_review_comment as cfg_pull_request_review_comment
+from configs.graph import pull_request_review as cfg_pull_request_review
+from configs.graph import pull_request as cfg_pull_request
+from configs.graph import push as cfg_push
+from configs.graph import schema as cfg_schema
+from configs.graph import star as cfg_star
 
 
 def get_config():
-    from configs.graph import commit_comment as cfg_commit_comment
-    from configs.graph import fork as cfg_fork
-    from configs.graph import issue_comment as cfg_issue_comment
-    from configs.graph import issues as cfg_issues
-    from configs.graph import member as cfg_member
-    from configs.graph import pull_request_review_comment as cfg_pull_request_review_comment
-    from configs.graph import pull_request_review as cfg_pull_request_review
-    from configs.graph import pull_request as cfg_pull_request
-    from configs.graph import push as cfg_push
-    from configs.graph import star as cfg_star
-
     config = {}
     config.update(cfg_commit_comment.config)
     config.update(cfg_fork.config)
@@ -27,15 +27,13 @@ def get_config():
     config.update(cfg_pull_request_review_comment.config)
     config.update(cfg_pull_request_review.config)
     config.update(cfg_pull_request.config)
-    config.update(cfg_push.config)
+    # config.update(cfg_push.config)
     config.update(cfg_star.config)
 
     return config
 
 
 def get_schema():
-    from configs.graph import schema as cfg_schema
-
     schema = cfg_schema.schema
 
     return schema
@@ -114,4 +112,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    exit(0)

@@ -16,13 +16,13 @@ def _extract(g, lk, trd_cnt, prt):
             continue
         with open(fn, 'r') as fr:
             for l in fr.readlines():
-                v1, r, v2, t = l.split('\t')
+                v1, r, v2, _ = l.split('\t')
                 with lk:
                     if v1 not in g:
                         g[v1] = set()
                     g[v1].add(v2)
 
-                    # NOTE: To find nodes with the most interactions
+                with lk:  # NOTE: To find nodes with the most interactions
                     if v2 not in g:
                         g[v2] = set()
                     g[v2].add(v1)
@@ -42,7 +42,11 @@ def extract():
     return g
 
 
-def _sample(g, in_sz, tg_sz, smpl_rt):
+def sample(g):
+    in_sz = int(os.getenv('IN_SZ', '100'))
+    tg_sz = int(os.getenv('TG_SZ', '10000'))
+    smpl_rt = int(os.getenv('SMPL_RT', '100'))
+
     mk = set()
     q = PriorityQueue()
     for _, v in sorted(map(lambda x: (len(x[1]), x[0]), g.items()), reverse=True)[:in_sz]:
@@ -58,14 +62,6 @@ def _sample(g, in_sz, tg_sz, smpl_rt):
         for n in random.sample(ss, min(len(ss), smpl_rt)):
             mk.add(n)
             q.put((-len(g.get(n, [])), n))
-    return vs
-
-
-def sample(g):
-    in_sz = int(os.getenv('IN_SZ', '100'))
-    tg_sz = int(os.getenv('TG_SZ', '10000'))
-    smpl_rt = int(os.getenv('SMPL_RT', '100'))
-    vs = _sample(g, in_sz, tg_sz, smpl_rt)
     return vs
 
 
@@ -105,5 +101,5 @@ def main():
 
 
 if __name__ == '__main__':
+    random.seed(2020)
     main()
-    exit(0)

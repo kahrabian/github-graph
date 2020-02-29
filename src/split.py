@@ -6,131 +6,141 @@ from datetime import datetime
 from threading import Lock, Thread
 
 
-def _split(all_d, all_s, of_d, mk_of_d, of_s, mk_of_s, tps, lk, trd_cnt, prt):
+def _extract(nr_t, nr_s, r_t, r_s, es, rs, tps, lk, trd_cnt, prt):
     sd = 'graph' if os.getenv('MD', 'G') == 'G' else 'sample'
     for fn in glob.glob(f'./data/{sd}/*.txt'):
+        fn_tm = datetime.strptime(fn, f'./data/{sd}/%Y-%m-%d-%H.txt')
+        if fn_tm.timetuple().tm_yday % trd_cnt != prt:
+            continue
         with open(fn, 'r') as fr:
-            rs = fr.read()
-            for r in rs.split('\n')[:-1]:
+            for l in fr.readlines():
+                r = l.strip()
+                if r == '':
+                    continue
                 v1, r, v2, t = r.split('\t')
-                with lk:
-                    all_d.add((v1, r, v2, t))
-                with lk:
-                    all_s.add((v1, r, v2))
+                t = int(datetime.strptime(t, '%Y-%m-%dT%H:%M:%SZ').timestamp())
                 if r in tps:
                     with lk:
-                        if (r, v2, t) not in mk_of_d:
-                            of_d.add((v1, r, v2, t))
-                            mk_of_d.add((r, v2, t))
+                        if (r, v2, t) not in r_t:
+                            r_t[(r, v2, t)] = v1
                     with lk:
-                        if (r, v2) not in mk_of_s:
-                            of_s.add((v1, r, v2))
-                            mk_of_s.add((r, v2))
+                        if (r, v2) not in r_s:
+                            r_s[(r, v2)] = v1
+                else:
+                    nr_t[(v1, r, v2, t)] = True
+                    nr_s[(v1, r, v2)] = True
+                with lk:
+                    es[v1] = True
+                    es[v2] = True
+                with lk:
+                    rs[r] = True
 
 
-def split():
+def _format(r):
+    return list(map(lambda x: (x[1], *x[0]), r.items()))
+
+
+def extract():
     lk = Lock()
-    all_d, all_s, of_d, mk_of_d, of_s, mk_of_s = set(), set(), set(), set(), set(), set()
+    nr_t, nr_s, r_t, r_s, es, rs = {}, {}, {}, {}, {}, {}
     tps = os.getenv('TPS', 'U_SE_C_I').split(',')
     trd_cnt = int(os.getenv('TRD_CNT', '8'))
     ts = []
     for i in range(0, trd_cnt):
-        t = Thread(target=_split, args=(all_d, all_s, of_d, mk_of_d, of_s, mk_of_s, tps, lk, trd_cnt, i))
+        t = Thread(target=_extract, args=(nr_t, nr_s, r_t, r_s, es, rs, tps, lk, trd_cnt, i))
         t.start()
         ts.append(t)
     for t in ts:
         t.join()
-    return list(all_d), list(all_s), list(of_d), list(of_s), list(all_d - of_d), list(all_s - of_s)
+    r_t = _format(r_t)
+    r_s = _format(r_s)
+    return list(nr_t.keys()), list(nr_s.keys()), r_t, r_s, es.keys(), rs.keys()
 
 
-def _build(all_d, all_s, of_d, of_s, tr_d, tr_s, lk, trd_cnt, prt):
-    for i, (v1, r, v2, t) in enumerate(all_d):
-        if i % trd_cnt != prt:
-            continue
-        with lk:
-            with open('./data/split/all_d.txt', 'a') as fw:
-                fw.write(f'{v1}\t{r}\t{v2}\t{t}\n')
-    for i, (v1, r, v2, t) in enumerate(of_d):
-        if i % trd_cnt != prt:
-            continue
-        with lk:
-            with open('./data/split/of_d.txt', 'a') as fw:
-                fw.write(f'{v1}\t{r}\t{v2}\t{t}\n')
-    for i, (v1, r, v2, t) in enumerate(tr_d):
-        if i % trd_cnt != prt:
-            continue
-        with lk:
-            with open('./data/split/train_d.txt', 'a') as fw:
-                fw.write(f'{v1}\t{r}\t{v2}\t{t}\n')
-    for i, (v1, r, v2, t) in enumerate(of_d):
-        if i % trd_cnt != prt:
-            continue
-        if i % 10 < 8:
-            with lk:
-                with open('./data/split/train_d.txt', 'a') as fw:
-                    fw.write(f'{v1}\t{r}\t{v2}\t{t}\n')
-        elif i % 10 == 8:
-            with lk:
-                with open('./data/split/valid_d.txt', 'a') as fw:
-                    fw.write(f'{v1}\t{r}\t{v2}\t{t}\n')
-        else:
-            with lk:
-                with open('./data/split/test_d.txt', 'a') as fw:
-                    fw.write(f'{v1}\t{r}\t{v2}\t{t}\n')
-
-    for i, (v1, r, v2) in enumerate(all_s):
-        if i % trd_cnt != prt:
-            continue
-        with lk:
-            with open('./data/split/all_s.txt', 'a') as fw:
-                fw.write(f'{v1}\t{r}\t{v2}\n')
-    for i, (v1, r, v2) in enumerate(of_s):
-        if i % trd_cnt != prt:
-            continue
-        with lk:
-            with open('./data/split/of_s.txt', 'a') as fw:
-                fw.write(f'{v1}\t{r}\t{v2}\n')
-    for i, (v1, r, v2) in enumerate(tr_s):
-        if i % trd_cnt != prt:
-            continue
-        with lk:
-            with open('./data/split/train_s.txt', 'a') as fw:
-                fw.write(f'{v1}\t{r}\t{v2}\n')
-    for i, (v1, r, v2) in enumerate(of_s):
-        if i % trd_cnt != prt:
-            continue
-        if i % 10 < 8:
-            with lk:
-                with open('./data/split/train_s.txt', 'a') as fw:
-                    fw.write(f'{v1}\t{r}\t{v2}\n')
-        elif i % 10 == 8:
-            with lk:
-                with open('./data/split/valid_s.txt', 'a') as fw:
-                    fw.write(f'{v1}\t{r}\t{v2}\n')
-        else:
-            with lk:
-                with open('./data/split/test_s.txt', 'a') as fw:
-                    fw.write(f'{v1}\t{r}\t{v2}\n')
+def index(s, fn):
+    idx = {x: i for i, x in enumerate(s)}
+    with open(f'{t_pth}/{fn}.txt', 'a') as f:
+        f.write(f'{len(idx)}\n')
+    with open(f'{s_pth}/{fn}.txt', 'a') as f:
+        f.write(f'{len(idx)}\n')
+    with open(f'{t_pth}/{fn}.txt', 'a') as ft, open(f'{s_pth}/{fn}.txt', 'a') as fs:
+        for x, i in idx.items():
+            ft.write(f'{x}\t{i}\n')
+            fs.write(f'{x}\t{i}\n')
+    return idx
 
 
-def build(all_d, all_s, of_d, of_s, tr_d, tr_s):
+def _split(r, ln, sz):
+    return r[:int(ln * sz)], r[int(ln * sz):int(ln * (sz + (1 - sz) / 2))], r[int(ln * (sz + (1 - sz) / 2)):]
+
+
+def split(nr, r, pth):
+    random.shuffle(r)
+    tr_r, vd, ts = _split(r, len(r), 0.8)
+    tr = nr + tr_r
+    random.shuffle(tr)
+    random.shuffle(vd)
+    random.shuffle(ts)
+
+    with open(f'{pth}/train2id.txt', 'a') as f:
+        f.write(f'{len(tr)}\n')
+    with open(f'{pth}/valid2id.txt', 'a') as f:
+        f.write(f'{len(vd)}\n')
+    with open(f'{pth}/test2id.txt', 'a') as f:
+        f.write(f'{len(ts)}\n')
+
+    return tr, vd, ts
+
+
+def _write(x, pth, fn, e_idx, r_idx, lk, trd_cnt, prt):
+    with open(f'{pth}/{fn}.txt', 'a') as fw:
+        for i, x in enumerate(x):
+            if i % trd_cnt != prt:
+                continue
+            with lk:
+                if len(x) == 4:
+                    fw.write(f'{e_idx[x[0]]}\t{r_idx[x[1]]}\t{e_idx[x[2]]}\t{x[3]}\n')
+                else:
+                    fw.write(f'{e_idx[x[0]]}\t{r_idx[x[1]]}\t{e_idx[x[2]]}\n')
+
+
+def _build(tr, vd, ts, pth, e_idx, r_idx, lk, trd_cnt, prt):
+    _write(tr, pth, 'train2id', e_idx, r_idx, lk, trd_cnt, prt)
+    _write(vd, pth, 'valid2id', e_idx, r_idx, lk, trd_cnt, prt)
+    _write(ts, pth, 'test2id', e_idx, r_idx, lk, trd_cnt, prt)
+
+
+def build(tr, vd, ts, pth, e_idx, r_idx):
     lk = Lock()
     trd_cnt = int(os.getenv('TRD_CNT', '8'))
-    ts = []
+    _ts = []
     for i in range(0, trd_cnt):
-        t = Thread(target=_build, args=(all_d, all_s, of_d, of_s, tr_d, tr_s, lk, trd_cnt, i))
+        t = Thread(target=_build, args=(tr, vd, ts, pth, e_idx, r_idx, lk, trd_cnt, i))
         t.start()
-        ts.append(t)
-    for t in ts:
+        _ts.append(t)
+    for t in _ts:
         t.join()
 
 
 def main():
-    all_d, all_s, of_d, of_s, tr_d, tr_s = split()
-    build(all_d, all_s, of_d, of_s, tr_d, tr_s)
+    nr_t, nr_s, r_t, r_s, es, rs = extract()
+    e_idx = index(es, 'entity2id')
+    r_idx = index(rs, 'relation2id')
+    tr_t, vd_t, ts_t = split(nr_t, r_t, t_pth)
+    tr_s, vd_s, ts_s = split(nr_s, r_s, s_pth)
+    build(tr_t, vd_t, ts_t, t_pth, e_idx, r_idx)
+    build(tr_s, vd_s, ts_s, s_pth, e_idx, r_idx)
 
 
 if __name__ == '__main__':
-    random.seed(2019)
+    random.seed(2020)
+
+    t_pth = './data/split/temporal'
+    if not os.path.isdir(t_pth):
+        os.mkdir(t_pth)
+
+    s_pth = './data/split/static'
+    if not os.path.isdir(s_pth):
+        os.mkdir(s_pth)
+
     main()
-    exit(0)
