@@ -54,7 +54,7 @@ def sample(g):
         q.put((-len(g[v]), v))
 
     vs = set()
-    while not q.empty() and len(vs) < tg_sz:
+    while len(vs) < tg_sz:
         _, v = q.get()
         vs.add(v)
 
@@ -62,7 +62,7 @@ def sample(g):
         for n in random.sample(ss, min(len(ss), smpl_rt)):
             mk.add(n)
             q.put((-len(g.get(n, [])), n))
-        if q.empty() and len(vs) < tg_sz:
+        if q.empty():
             ss = set(g.keys()) - mk
             for _, v in sorted(map(lambda x: (len(x), x), ss), reverse=True)[:min(in_sz, tg_sz - len(vs))]:
                 mk.add(v)
