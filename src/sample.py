@@ -63,7 +63,7 @@ def sample(g):
             mk.add(n)
             q.put((-len(g.get(n, [])), n))
         if q.empty() and len(vs) < tg_sz:
-            ss = set(g.items()) - mk
+            ss = set(g.keys()) - mk
             for _, v in sorted(map(lambda x: (len(x[1]), x[0]), ss), reverse=True)[:min(in_sz, tg_sz - len(vs))]:
                 mk.add(v)
                 q.put((-len(g.get(v, [])), v))
