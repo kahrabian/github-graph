@@ -16,7 +16,7 @@ def _extract(g, lk, trd_cnt, prt):
             continue
         with open(fn, 'r') as fr:
             for l in fr.readlines():
-                v1, r, v2, _ = l.split('\t')
+                v1, v2, r, _ = l.split('\t')
                 with lk:
                     if v1 not in g:
                         g[v1] = set()
@@ -77,7 +77,7 @@ def _build(vs, trd_cnt, prt):
         with open(fn, 'r') as fr:
             with open(inc_pth, 'w') as fw:
                 for l in fr.readlines():
-                    v1, _, v2, _ = l.split('\t')
+                    v1, v2, _, _ = l.split('\t')
                     if v1 in vs and v2 in vs:
                         fw.write(l)
         os.rename(inc_pth, com_pth)
