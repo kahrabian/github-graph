@@ -54,7 +54,7 @@ def sample(g):
         q.put((-len(g[v]), v))
 
     vs = set()
-    while len(vs) < tg_sz:
+    while not q.empty() and len(vs) < tg_sz:
         _, v = q.get()
         vs.add(v)
 
