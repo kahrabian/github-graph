@@ -110,21 +110,25 @@ def split(nr, r, pth):
 
 
 def _write(x, pth, fn, e_idx, r_idx, lk, trd_cnt, prt):
-    with open(f'{pth}/{fn}.txt', 'a') as fw:
-        for i, x in enumerate(x):
-            if i % trd_cnt != prt:
-                continue
-            with lk:
+    with open(f'{pth}/{fn}2id.txt', 'a') as fw:
+        with open(f'{pth}/{fn}.txt', 'a') as fg:
+            for i, x in enumerate(x):
+                if i % trd_cnt != prt:
+                    continue
                 if len(x) == 4:
-                    fw.write(f'{e_idx[x[0]]}\t{e_idx[x[1]]}\t{r_idx[x[2]]}\t{x[3]}\n')
+                    with lk:
+                        fw.write(f'{e_idx[x[0]]}\t{e_idx[x[1]]}\t{r_idx[x[2]]}\t{x[3]}\n')
                 else:
-                    fw.write(f'{e_idx[x[0]]}\t{e_idx[x[1]]}\t{r_idx[x[2]]}\n')
+                    with lk:
+                        fw.write(f'{e_idx[x[0]]}\t{e_idx[x[1]]}\t{r_idx[x[2]]}\n')
+                    with lk:
+                        fg.write(f'{e_idx[x[0]]}\t{r_idx[x[2]]}\t{e_idx[x[1]]}\n')  # NOTE: GraphVite format
 
 
 def _build(tr, vd, ts, pth, e_idx, r_idx, lk, trd_cnt, prt):
-    _write(tr, pth, 'train2id', e_idx, r_idx, lk, trd_cnt, prt)
-    _write(vd, pth, 'valid2id', e_idx, r_idx, lk, trd_cnt, prt)
-    _write(ts, pth, 'test2id', e_idx, r_idx, lk, trd_cnt, prt)
+    _write(tr, pth, 'train', e_idx, r_idx, lk, trd_cnt, prt)
+    _write(vd, pth, 'valid', e_idx, r_idx, lk, trd_cnt, prt)
+    _write(ts, pth, 'test', e_idx, r_idx, lk, trd_cnt, prt)
 
 
 def build(tr, vd, ts, pth, e_idx, r_idx):
