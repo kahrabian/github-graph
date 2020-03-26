@@ -12,7 +12,7 @@ config = {
                    'type': {
                        'created': 'U_SO_C_PRC',
                        'edited': 'U_SO_E_PRC',
-                       'edited': 'U_SO_D_PRC',
+                       'deleted': 'U_SO_D_PRC',
                    },
                    'type_field': 'payload.action',
                    'features': [
@@ -37,7 +37,7 @@ config = {
                    'type': {
                        'created': 'PRC_AO_C_P',
                        'edited': 'PRC_AO_E_P',
-                       'edited': 'PRC_AO_D_P',
+                       'deleted': 'PRC_AO_D_P',
                    },
                    'type_field': 'payload.action',
                    'features': [

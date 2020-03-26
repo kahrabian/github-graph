@@ -14,4 +14,5 @@ export TRD_CNT=8
 export MD=S
 export TR=H
 export TPS=U_SE_C_I
+export SP=S
 python src/split.py

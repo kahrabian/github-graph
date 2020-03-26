@@ -12,7 +12,7 @@ config = {
                    'type': {
                        'created': 'U_SO_C_IC',
                        'edited': 'U_SO_E_IC',
-                       'edited': 'U_SO_D_IC',
+                       'deleted': 'U_SO_D_IC',
                    },
                    'type_field': 'payload.action',
                    'features': [
@@ -37,7 +37,7 @@ config = {
                    'type': {
                        'created': 'IC_AO_C_I',
                        'edited': 'IC_AO_E_I',
-                       'edited': 'IC_AO_D_I',
+                       'deleted': 'IC_AO_D_I',
                    },
                    'type_field': 'payload.action',
                    'features': [

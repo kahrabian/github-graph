@@ -87,13 +87,25 @@ def index(s, fn):
     return idx
 
 
-def _split(r, ln, sz):
-    return r[:int(ln * sz)], r[int(ln * sz):int(ln * (sz + (1 - sz) / 2))], r[int(ln * (sz + (1 - sz) / 2)):]
+def _split(r, ln, sz, sp):
+    if sp == 'S':
+        return r[:int(ln * sz)], r[int(ln * sz):int(ln * (sz + (1 - sz) / 2))], r[int(ln * (sz + (1 - sz) / 2)):]
+
+    t = list(map(lambda x: x[3], r))
+    lb_t, ub_t = min(t), max(t)
+    t_tr = lb_t + sz * (ub_t - lb_t)
+    t_vd = t_tr + ((1 - sz) / 2) * (ub_t - lb_t)
+
+    tr = list(filter(lambda x: x[3] < t_tr, r))
+    vd = list(filter(lambda x: t_tr <= x[3] < t_vd, r))
+    ts = list(filter(lambda x: t_vd <= x[3], r))
+
+    return tr, vd, ts
 
 
-def split(nr, r, pth):
+def split(nr, r, pth, sp='S'):
     random.shuffle(r)
-    tr_r, vd, ts = _split(r, len(r), 0.8)
+    tr_r, vd, ts = _split(r, len(r), 0.8, sp)
     tr = nr + tr_r
     random.shuffle(tr)
     random.shuffle(vd)
@@ -144,10 +156,11 @@ def build(tr, vd, ts, pth, e_idx, r_idx):
 
 
 def main():
+    sp = os.getenv('SP', 'S')
     nr_t, nr_s, r_t, r_s, es, rs = extract()
     e_idx = index(es, 'entity2id')
     r_idx = index(rs, 'relation2id')
-    tr_t, vd_t, ts_t = split(nr_t, r_t, t_pth)
+    tr_t, vd_t, ts_t = split(nr_t, r_t, t_pth, sp)
     tr_s, vd_s, ts_s = split(nr_s, r_s, s_pth)
     build(tr_t, vd_t, ts_t, t_pth, e_idx, r_idx)
     build(tr_s, vd_s, ts_s, s_pth, e_idx, r_idx)
