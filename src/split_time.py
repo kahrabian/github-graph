@@ -88,7 +88,6 @@ def index(s, fn, pth):
 
 def _write(d, pth, fn, e_idx, r_idx, lk, trd_cnt, prt):
     with open(f'{pth}/{fn}2id.txt', 'a') as fw:
-        fw.write(f'{len(d)}\n')
         with open(f'{pth}/{fn}.txt', 'a') as fg:
             for i, x in enumerate(d):
                 if i % trd_cnt != prt:
@@ -106,6 +105,13 @@ def _build(tr, vd, ts, pth, e_idx, r_idx, lk, trd_cnt, prt):
 
 
 def build(tr, vd, ts, pth, e_idx, r_idx):
+    with open(f'{pth}/train2id.txt', 'a') as fw:
+        fw.write(f'{len(tr)}\n')
+    with open(f'{pth}/valid2id.txt', 'a') as fw:
+        fw.write(f'{len(vd)}\n')
+    with open(f'{pth}/test2id.txt', 'a') as fw:
+        fw.write(f'{len(ts)}\n')
+
     lk = Lock()
     trd_cnt = int(os.getenv('TRD_CNT', '8'))
     _ts = []
