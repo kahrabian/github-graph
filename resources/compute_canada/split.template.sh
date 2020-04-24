@@ -13,6 +13,6 @@ source activate gg
 export TRD_CNT=8
 export MD=S
 export TR=H
-export TPS=U_SE_C_I
-export SP=S
+export TPS=U_SE_C_I,U_SO_C_P
+export SP=I
 python src/split.py
