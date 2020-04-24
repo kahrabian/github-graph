@@ -14,7 +14,7 @@ def reg(s):
 
 def _t_extract(g, lk, trd_cnt, prt):
     st_tm = datetime.strptime('2019-12-25-00', '%Y-%m-%d-%H')
-    sp_tm = datetime.strptime('2019-12-25-20', '%Y-%m-%d-%H')
+    sp_tm = datetime.strptime('2019-12-25-00', '%Y-%m-%d-%H')
     for fn in glob.glob('./data/graph/*.txt'):
         fn_tm = datetime.strptime(fn, './data/graph/%Y-%m-%d-%H.txt')
         if fn_tm < st_tm or fn_tm > sp_tm or fn_tm.timetuple().tm_yday % trd_cnt != prt:
@@ -22,7 +22,7 @@ def _t_extract(g, lk, trd_cnt, prt):
         with open(fn, 'r') as fr:
             for l in fr.readlines():
                 #head, tail, relation, time
-                v1, r ,v2, t = l.strip().split('\t')
+                v1, v2,r, t = l.strip().split('\t')
                 date1 = datetime.strptime(t[:10], '%Y-%m-%d').strftime('%Y-%m-%d')
                 tuple1 = (v1,date1)
                 tuple2 = (v2,date1)
@@ -53,7 +53,7 @@ def t_extract():
 
 def _extract(g, lk, trd_cnt, prt):
     st_tm = datetime.strptime('2019-12-25-00', '%Y-%m-%d-%H')
-    sp_tm = datetime.strptime('2019-12-25-20', '%Y-%m-%d-%H')
+    sp_tm = datetime.strptime('2019-12-25-00', '%Y-%m-%d-%H')
     for fn in glob.glob('./data/graph/*.txt'):
         fn_tm = datetime.strptime(fn, './data/graph/%Y-%m-%d-%H.txt')
         if fn_tm < st_tm or fn_tm > sp_tm or fn_tm.timetuple().tm_yday % trd_cnt != prt:
@@ -61,7 +61,7 @@ def _extract(g, lk, trd_cnt, prt):
         with open(fn, 'r') as fr:
             for l in fr.readlines():
                 #head, tail, relation, time
-                v1, r ,v2, t = l.strip().split('\t')
+                v1, v2,r, t = l.strip().split('\t')
 
                 with lk:
                     if v1 not in g:
@@ -160,77 +160,99 @@ def sample(g):
     print("Size",len(vs))
     return vs
 
-def pop_score(g, w_p, w_t):
+def time_dict_build(gt):
     """
-    :param g: the dict of graph key:value~(node,timestamp): adjecentN(node)
+    This method use to build up the earliest and the latest timestamp for the entity
+    :param gt: the dict of graph key:value~(node,timestamp): adjecentN(node)
+    :return: dt_e,dt_l the dictionary for the timestamp
+    """
+    dt_e ={}
+    dt_l = {}
+    for v,t in gt.keys():
+        if v not in dt_e:
+            dt_e[v] = t
+        if v not in dt_l:
+            dt_l[v] = t
+        dt_e[v] = min(datetime.strptime(dt_e[v], '%Y-%m-%d'),datetime.strptime(t, '%Y-%m-%d')).strftime('%Y-%m-%d')
+        dt_l[v] = max(datetime.strptime(dt_l[v], '%Y-%m-%d'),datetime.strptime(t, '%Y-%m-%d')).strftime('%Y-%m-%d')
+    return dt_e,dt_l
+
+def pop_score(g, dt_e, dt_l, w_p, w_t):
+    """
+    The functions use BFS to traverse the tree component with repo as root. The pop_score will be
+    composed of the sum of children
+    :param g: the dict of graph key:value~node: adjecentN(node)
+    :param dt_e: dictionary of entity and its earliest timestamp
+    :param dt_l: dictionary of entity and its latest timestamp
     :param w_p: the weight on popularity score
     :param w_t: the weight on the long time span focus
     :return: dict1: key:value~(repo): initial_pop_score
     """
-    d = {}
+    d = {}  # NOTE: Already seen nodes
+
     for key, value in g.items():
-        if key[0] not in d:
-            if reg(key[0]) == "repo":
-                # popular user have a lot of activity
-                # U_HS_A_R, U_HS_R_R user start the repo might have low weighted
-                temp = 0
-                date1 = datetime.strptime(key[1], '%Y-%m-%d')
-                diff = 0
-                for x in value:
-                    if reg(x[0]) == "user" or reg(x[0]) == "repo":
-                        temp += 1
-                    else:
-                        temp += 0.5
-                    temp *= w_p
-                    date2 = datetime.strptime(x[1], '%Y-%m-%d')
-                    days = abs((date1 - date2).days)
-                    if days > diff:
-                        diff = days
-                    temp += diff * w_t
-                d[key[0]] = temp
+        if key not in d and reg(key) == "repo":
+            # running BFS algorithm
+            mk = {}
+            q = Queue()
+            q.put(key)
+
+            cmp_size = 0
+            earliest_time = datetime.strptime(dt_e[key], '%Y-%m-%d')
+            latest_time = None
+
+            while not q.empty():
+                v = q.get()
+                mk[v] = True
+                cmp_size += 1
+                current_time = datetime.strptime(dt_l[v], '%Y-%m-%d')
+                if latest_time is None or latest_time < current_time:
+                    latest_time = current_time
+                for u in g[v]:  # - set(mk.keys())
+                    if not mk.get(u, False) and reg(u) != 'user' and reg(u) != 'repo':
+                        q.put(u)
+                    elif reg(u) == 'user':
+                        # count the user but other than that do nothing
+                        cmp_size += 1
+            cmp_size = cmp_size * w_p + w_t * abs(latest_time - earliest_time).days
+            d[key] = cmp_size
     return d
 
-def root_repo_tree(g, dict1,height,ds,option=1):
+def root_repo_tree(g, dict1, isolate=True):
     """
-    Implmented the kruskal's algorithms to build up repo tree in the forest
+    Implmented the BFS algorithms to build up repo tree in the forest
     :param g:  the dict of graph key:value~(node,timestamp): adjecentN(node)
-    :return: dict2 for pop_samping: key:value~(node): set of repo it connected to
+    :param dict1: dictionary of all repos
+    :return: dict2 for pop_samping: key:value~(node): list of repo it connected to
     """
-    # traversal upto the user
-
-    d = {}
-    Q = Queue()
-    print("Length",len(dict1))
+    p = {}
+    print("Length", len(dict1))
     for key, value in dict1.items():
-        # BFS
-        seen = set()
-        Q.put((key,0))
-        # print(key)
+        mk = set()
+        Q = Queue()
+        Q.put((key, 0))
+
         while not Q.empty():
-            v = Q.get()
-            # print(v)
-            if v[0] not in d:
-                d[v[0]] = set()
-            seen.add(v[0])
-            d[v[0]].add(key)
+            v, l = Q.get()
+            # print("v:", v)
+            mk.add(v)
+            if v not in p:
+                p[v] = []
+                # print("V",v," ",l," ",len(mk))
+            p[v].append(key)
 
-            if v[1] >height or len(seen) > ds:
-                break
+            # remove
+            # if not isolate and (l > height or len(mk) > ds):
+            #     break
 
-            if option ==1:
-                if reg(v[0]) == 'user':
-                    continue
-                else:
-                    for n in g.get(v[0], [])-seen:
-                        Q.put((n,v[1]+1))
+            if isolate and (reg(v) == 'user' or (reg(v) == 'repo' and v != key)):
+                continue
             else:
+                for u in g[v] - mk:
+                    Q.put((u, l + 1))
+                # print("U", u)
 
-                for n in g.get(v[0], [])-seen:
-                    Q.put((n,v[1]+1))
-        seen.clear()
-    return d
-# mapping string into
-
+    return p
 
 def weighted_random_by_dct(dct):
     rand_val = random.random()
@@ -241,136 +263,99 @@ def weighted_random_by_dct(dct):
             return k, v
     assert False, 'unreachable'
 
+def adjust_score(dict1, node, n_common_user, w_a):
+    """
+    :param dict1: dict of repo: pop_socre
+    :param node: repo node
+    :param n_common_user: the number of count of common users
+    :param w_a: weight
+    :return: adjust score
+    """
 
-def only_user_left(Q):
-    for x in Q.queue:
-        v = x[1]
-        if reg(v) != 'user':
-            return False
-    return True
+    s = dict1[node]
+    adj_s = s + (n_common_user - 1) * s / w_a
 
+    return adj_s
 
-def adjust_score(dict1, dict2, node, g, w):
-    try:
-        root_repo = dict2[node]
-        s = dict1[root_repo]
-        adj_nodes = g[s]
-        n_user = 0
-        for n in adj_nodes:
-            if reg(n) == 'user':
-                n_user += 1
-        adj_s = s + (n_user - 1) * s / w
-        return adj_s
-    except:
-        return 0
-
-
-def pop_sampling_v2(g, dict1, dict2, n, k, m, w, p, ini_op=1):
+def pop_sampling_v2(g, dict1, dict2, n, k, m, w_a, p, ini_op=1):
     """
     :param g: the dict of graph key:value~(node,timestamp): adjecentN(node)
-    :param n: the required number of sampling
     :param dict1: dictionary of repo and its popscore, or the set of manually selection
     :param dict2: dictionary of entity and its repo as root
+    :param n: the required number of sampling
     :param k: the initial set size
     :param m: the expanding size
-    :param w_p: the weight on popularity score
-    :param w_t: the weight on the long time span focus
-    :param w: the reweight for popsocre
+    :param w_a: the reweight for popsocre
     :param p: the pre-set probability threshold
     :parameter ini_op: 1 top repos based on pop_score, 2 manual selection - just change the input dict1, 3 random sample based on pop_score
     :return: a set of sampled entity
     """
-
-    U = set()
-    Q = PriorityQueue()
+    U = set()  # NOTE: Selected nodes
+    Q = PriorityQueue()  # NOTE: Repos
     print(len(g.keys()))
     ### initial sampling
     # 1 top repos based on pop_score
     # 2 manual selection - just change the input dict1
     # 3 random sample based on pop_score
-    try:
-        if ini_op == 1:
-            for s, v in sorted(map(lambda x: (x[1], x[0]), dict1.items()), reverse=True)[:k]:
-                Q.put((-s, v))
-                U.add(v)
-        elif ini_op == 2:
-            U = set(dict1.keys())
-            # with the assumption that the size already k
-            for u in U:
-                Q.put((-dict1[u], u))
-        elif ini_op == 3:
-            while len(U) < k:
-                u, v = weighted_random_by_dct(dict1)
-                U.add(u)
-                Q.put((-v, u))
-        else:
-            raise ValueError("Invalid initial option")
-    except ValueError as ve:
-        print(ve)
+    if ini_op == 1:
+        # sorted(dict1.items(), key=lambda x: x[1], reverse=True)[:k]
+        for s, v in sorted(map(lambda x: (x[1], x[0]), dict1.items()), reverse=True)[:k]:
+            Q.put((-s, v))
+    elif ini_op == 2:
+        # U = set(dict1.keys())
+        # with the assumption that the size already k
+        for v, s in dict1.items():
+            Q.put((-s, v))
+    elif ini_op == 3:
+        while Q.qsize() < k:
+            # u, v = weighted_random_by_dct(dict1)
+            v, s = weighted_random_by_dct(dict1)
+            # U.add(u)
+            Q.put((-s, v))
+    else:
+        raise ValueError("Invalid initial option")
 
-    print("Initial_Size:",len(U))
-    ### growth
-    vs = set()
-    ul = {}
+    print("Initial_Size:", Q.qsize())
+
+    vs = set()  # NOTE: Set of already seen nodes
+    us = set()  # NOTE: Set of already seen Users
     while not Q.empty() and len(vs) < n:
+        s, root = Q.get()
+        U.add(root)
+        vs.add(root)
 
-        score, v1 = Q.get()
-        vs.add(v1)
-        print(len(vs))
-        if reg(v1) == 'user':
-            if v1 in ul:
-                ul[v1] = max(-score, ul[v1])
-            else:
-                ul[v1] = -score
-        else:
-            # remove the one that have already seen
-            nb = g.get(v1, set()) - U
+        gc = {}
+        Q_v = Queue() # NOTE: BFS queue
+        Q_v.put(root)
+        # print(len(vs))
+        while not Q_v.empty() and len(vs) < n:  # NOTE: If we are in middle of component we could ignore the size restriction
+            v = Q_v.get()
             # BFS
-            for nn in random.sample(nb, min(len(nb), m)):
-                U.add(nn)
-                try:
-                    if reg(nn) == 'repo':
-                        Q.put((-dict1[nn], nn))
-                    else:
-                        R = dict2.get(nn,[])
-                        if len(R) > 1:
-                            R_d = {r: dict1[r] for r in R}
-                            Q.put((-max(R_d.values()), nn))
-                        elif len(R) == 1:
-                            r = R.pop()
-                            Q.put((-dict1[r], nn))
-                        else:
-                            continue
-                except ValueError:
-                    continue
-        # until all are leaf users
-        if Q.empty() and len(ul) > 0:
-            u = max(ul, key=ul.get)
-            ul.pop(u)
-            Y = dict2.get(u,[])
-            nb = Y - U
-            # check threshold
-            if random.uniform(0, 1) < p and len(vs) < n:
-                for nn in random.sample(nb, min(len(nb), m)):
-                    # Z < - randomSample(m, adjustScores(Y))
-                    # use Y to calculate the adjustScore for n
-                    adj_s = adjust_score(dict1, dict2, nn, g, w)
-                    if adj_s ==0:
-                        R = dict2.get(nn, [])
-                        if len(R) > 1:
-                            R_d = {r: dict1[r] for r in R}
-                            Q.put((-max(R_d.values()), nn))
-                        elif len(R) == 1:
-                            r = R.pop()
-                            Q.put((-dict1[r], nn))
-                    else:
-                        Q.put((-adj_s, nn))
-        # keep sure we can continue sampling
-        elif Q.empty() and len(vs) < n:
-            nb = set(g.keys()) - U
-            for _, v in sorted(map(lambda x: (len(x), x), nb), reverse=True)[:min(k, n - len(vs))]:
-                U.add(v)
-                Q.put((-len(g.get(v, [])), v))
+            for u in g[v] - vs:  # NOTE: You don't need this, you can iterate over all of them
+                if reg(u) == 'user':
+                    for r in dict2[u]:
+                        if r not in gc and r != root:
+                            gc[r] = 0
+                        if r!=root:
+                            gc[r] += 1
+                    us.add(u)
+                    # us[u] = max(-s, us.get(u, 0))
+                else:
+                    vs.add(u)
+                    Q_v.put(u)
+
+        for v, w in gc.items():
+            gc[v] = adjust_score(dict1,  v, w, w_a)
+
+        if random.uniform(0, 1) < p and len(vs) < n:
+            for r,s in sorted(gc.items(), key=lambda x: x[1], reverse=True)[:min(len(gc), m)]:
+                if r not in vs:
+                    Q.put((-dict1[r], r))
+        if Q.empty() and len(vs) < n:
+            nb = set(dict1.keys()) - U
+            for s, v in sorted([(dict1[r], r) for r in nb], key=lambda x: x[0], reverse=True)[:k]:
+                Q.put((-s, v))
+    vs = vs.union(us)
     print("Finish sampling", len(vs))
     return vs
 
@@ -423,7 +408,7 @@ def build(vs):
 
 def _extract_graph(g, lk, trd_cnt, prt):
     st_tm = datetime.strptime('2019-12-25-00', '%Y-%m-%d-%H')
-    sp_tm = datetime.strptime('2019-12-27-23', '%Y-%m-%d-%H')
+    sp_tm = datetime.strptime('2019-12-25-00', '%Y-%m-%d-%H')
     for fn in glob.glob('./data/sample/*.txt'):
         fn_tm = datetime.strptime(fn, './data/sample/pop_%Y-%m-%d-%H.txt')
         if fn_tm < st_tm or fn_tm > sp_tm or fn_tm.timetuple().tm_yday % trd_cnt != prt:
@@ -530,7 +515,7 @@ def main():
     g = extract()
     # # print(dict1)
     #print(g['/repo/188237225'])
-    dict2 = root_repo_tree(g, dict1,100,4,option=1)
+    # dict2 = root_repo_tree(g, dict1,100,4,option=1)
     # write_dict('dict2', dict2)
     print("Dict1 and Dict2 Finished")
     vs = pop_sampling_v2(g, dict1, dict2, 5000, 5, 100, 50, 0.5, ini_op=1)
@@ -540,8 +525,40 @@ def main():
 
 if __name__ == '__main__':
     random.seed(2020)
-    main()
-
+    # main()
+    # First part to build 2 dictions
+    tg = t_extract()
+    dt_e,dt_l = time_dict_build(tg)
+    # print(dict(list(dt_e.items())[0:5]))
+    # print(dict(list(dt_l.items())[0:5]))
+    # write_dict('dt_e', dt_e)
+    # write_dict('dt_l', dt_l)
+    # /user/16953053 /issue/542316836
+    # dt_e = read_dict('dt_e')
+    # dt_l = read_dict('dt_l')
+        # first dict
+    g = extract()
+    # print(len(g['/repo/91573538']))
+    dict1 = pop_score(g,dt_e,dt_l,60,1)
+    print(dict1)
+    # write_dict('dict1', dict1)
+    # dict1 = read_dict('dict1')
+    # print(dict(list(dict1.items())[0:10]))
+    # print(dict1['/repo/91573538'])
+        #second dict
+    dict2 = root_repo_tree(g,dict1)
+    print(dict2)
+    # write_dict('dict2', dict2)
+    # dict2 = read_dict('dict2')
+    # print(dict(list(sorted(dict2.items()))[0:10]))
+    # dict3 = root_repo_tree(g, dict1, 10, 200, isolate=False)
+    # write_dict('dict3', dict3)
+    # print(dict(list(dict3.items())[0:10]))
+    # dict3 = read_dict('dict3')
+    # print(dict3)
+    vs = pop_sampling_v2(g,dict1,dict2,10,5,2,50,0.5)
+    print(sorted(vs))
+    # print(dt)
     # with open('./data/test.txt', 'w') as f:
     #     for key, value in extract_graph().items():
     #         f.write('{} {} '.format(key,value))
