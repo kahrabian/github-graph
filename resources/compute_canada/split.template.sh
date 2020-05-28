@@ -8,11 +8,10 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=kian.ahrabian@mail.mcgill.ca
 
-source activate gg
+module load python/3
 
-export TRD_CNT=8
-export MD=S
-export TR=H
+export TRD_CNT=4
+export DIR=sample
 export TPS=U_SE_C_I,U_SO_C_P
 export SP=I
 python src/split.py
