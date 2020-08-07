@@ -37,9 +37,7 @@ def graph(trd_cnt):
     return g
 
 
-def bfs(g):
-    root = '/repo/41881900'
-
+def bfs(g, root):
     vs = set()  # NOTE: Mark
     vs.add(root)
 
@@ -54,11 +52,11 @@ def bfs(g):
     return vs
 
 
-def _build(vs, trd_cnt, prt):
+def _build(vs, p, trd_cnt, prt):
     for fn in glob.glob('./data/graph/*.txt'):
         fn_tm = datetime.strptime(fn, './data/graph/%Y-%m-%d-%H.txt')
-        inc_pth = fn_tm.strftime('./data/vscode/%Y-%m-%d-%H.txt')
-        com_pth = fn_tm.strftime('./data/vscode/%Y-%m-%d-%H.txt')
+        inc_pth = fn_tm.strftime(f'./data/{p}/%Y-%m-%d-%H_.txt')
+        com_pth = fn_tm.strftime(f'./data/{p}/%Y-%m-%d-%H.txt')
         if os.path.exists(com_pth) or fn_tm.toordinal() % trd_cnt != prt:
             continue
         with open(fn, 'r') as fr:
@@ -70,10 +68,12 @@ def _build(vs, trd_cnt, prt):
         os.rename(inc_pth, com_pth)
 
 
-def build(vs, trd_cnt):
+def build(vs, p, trd_cnt):
+    os.makedirs(f'./data/{p}', exist_ok=True)
+
     ts = []
     for i in range(0, trd_cnt):
-        t = Thread(target=_build, args=(vs, trd_cnt, i))
+        t = Thread(target=_build, args=(vs, p, trd_cnt, i))
         t.start()
         ts.append(t)
     for t in ts:
@@ -93,7 +93,6 @@ def dump(fn, x):
 
 if __name__ == '__main__':
     trd_cnt = int(os.getenv('TRD_CNT', '16'))
-    os.makedirs('./data/vscode', exist_ok=True)
 
     g_p = './data/g.pkl'
     if os.path.exists(g_p):
@@ -103,12 +102,41 @@ if __name__ == '__main__':
         dump(g_p, g)
     print(f'graph size: {len(g)}')
 
-    vs_p = './data/vs.pkl'
-    if os.path.exists(vs_p):
-        vs = load(vs_p)
-    else:
-        vs = bfs(g)
-        dump(vs_p, vs)
-    print(f'sample node size: {len(vs)}')
+    roots = {
+        # 'microsoft/vscode': '/repo/41881900',
+        'rails/rails': '/repo/8514',
+        'dimagi/commcare-hq': '/repo/247278',
+        'tgstation/tgstation': '/repo/3234987',
+        'symfony/symfony': '/repo/458058',
+        'owncloud/core': '/repo/5550552',
+        'Baystation12/Baystation12': '/repo/2715933',
+        'joomla/joomla-cms': '/repo/2464908',
+        'Wikia/app': '/repo/5532313',
+        'rapid7/metasploit-framework': '/repo/2293158',
+        'twbs/bootstrap': '/repo/2126244',
+        'dlang/dmd': '/repo/1257070',
+        'cdnjs/cdnjs': '/repo/1409811',
+        'puppetlabs/puppet': '/repo/910744',
+        'adobe/brackets': '/repo/2935735',
+        'sympy/sympy': '/repo/640534',
+        'wet-boew/wet-boew': '/repo/4297273',
+        'Katello/katello': '/repo/4007018',
+        'cocos2d/cocos2d-x': '/repo/1093228',
+        'zendframework/zendframework': '/repo/702550',
+        'angular/angular.js': '/repo/460078',
+        'cakephp/cakephp': '/repo/656494',
+        'scala/scala': '/repo/2888818',
+        'ipython/ipython': '/repo/658518',
+        'nodejs/node-v0.x-archive': '/repo/211666'
+    }
+    for fn, root in roots.items():
+        p = fn.replace("/", "_")
+        vs_p = f'./data/vs_{p}.pkl'
+        if os.path.exists(vs_p):
+            vs = load(vs_p)
+        else:
+            vs = bfs(g, root)
+            dump(vs_p, vs)
+        print(f'sample node size {fn}: {len(vs)}')
 
-    build(vs, trd_cnt)
+        build(vs, p, trd_cnt)
