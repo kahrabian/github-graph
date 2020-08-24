@@ -20,7 +20,9 @@ def build(total, part):
                         continue
                     event = json.loads(r)
                     if event['type'] == 'PullRequestEvent':
-                        fw.write(f"/pr/{event['payload']['pull_request']['id']}\t{event['payload']['number']}\n")
+                        pr = event['payload']['pull_request']['id']
+                        url = event['payload']['pull_request']['url']
+                        fw.write(f"/pr/{pr}\t{url}\n")
             os.rename(inc_path, com_path)
 
 
