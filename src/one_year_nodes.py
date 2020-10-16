@@ -65,7 +65,9 @@ def dump(fn, x):
 
 
 if __name__ == '__main__':
-    trd_cnt = int(os.getenv('TRD_CNT', '16'))
+    trd_cnt = int(os.getenv('TRD_CNT', '1'))
+    total_jobs = int(os.getenv('TOTAL_JOBS', '1'))
+    task_id = int(os.getenv('SLURM_ARRAY_TASK_ID', '0'))
 
     g_p = './data/tmp/g.pkl'
     if os.path.exists(g_p):
@@ -76,10 +78,12 @@ if __name__ == '__main__':
     print(f'graph size: {len(g)}')
 
     info = {}
-    repos = list(filter(lambda x: re.match('\/(.*?)\/', x).groups()[0] == 'repo', g.keys()))
+    repos = list(sorted(filter(lambda x: re.match('\/(.*?)\/', x).groups()[0] == 'repo', g.keys())))
     for i, v in enumerate(repos):
+        if i % total_jobs != task_id:
+            continue
         info[v] = bfs(g, v)
-        print(f'[{i}/{len(repos)}] sample node size {v}: {info[v]}')
+        print(f'[{i + 1}/{len(repos)}] sample node size {v}: {info[v]}')
 
-    with open('./data/tmp/info.json', 'w') as f:
+    with open(f'./data/tmp/info_{task_id}.json', 'w') as f:
         f.write(json.dumps(info))
