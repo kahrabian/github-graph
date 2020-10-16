@@ -11,4 +11,4 @@
 module load python/3
 
 export TRD_CNT=20
-python src/one_year.py
+python src/one_year_nodes.py
