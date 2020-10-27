@@ -1,16 +1,4 @@
 schema = {
-    'commit': {
-        'pk': 'id',
-        'features': [
-            'id',
-        ],
-    },
-    'commit_comment': {
-        'pk': 'id',
-        'features': [
-            'id',
-        ],
-    },
     'issue': {
         'pk': 'id',
         'features': [

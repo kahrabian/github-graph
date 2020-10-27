@@ -1,15 +1,15 @@
 config = {
-    'MemberEvent': {
+    'WatchEvent': {
         'entities': [
             {
                 'v1': {
                     'type': 'user',
                     'features': {
-                        'id': 'payload.member.id',
+                        'id': 'actor.id',
                     },
                 },
                 'e': {
-                    'type': 'U_A_R',
+                    'type': 'U_W_R',
                     'features': [
                         'created_at',
                     ],
