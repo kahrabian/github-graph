@@ -11,6 +11,7 @@
 
 module load python/3
 
+export YEAR=2015
 export TRD_CNT=2
 export TOTAL_JOBS=16
 python src/one_year_nodes.py
