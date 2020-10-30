@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=def-jinguo
-#SBATCH --job-name=gg-build
+#SBATCH --job-name=gg-build_id
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=1G
 #SBATCH --time=1:00:00
@@ -13,4 +13,4 @@ module load python/3
 
 export YEAR=2015
 export TOTAL_THREADS=72
-python src/build.py
+python src/build_id.py

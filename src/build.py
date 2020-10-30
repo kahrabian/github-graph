@@ -42,13 +42,13 @@ def fetch(key, data):
     return data
 
 
-def build(total, part):
+def build(year, total, part):
     gconfig = get_config()
     gschema = get_schema()
-    for fn in glob.glob('./data/events/*.json'):
-        fn_time = datetime.strptime(fn, './data/events/%Y-%m-%d-%H.json')
-        inc_path = fn_time.strftime('./data/graph/_%Y-%m-%d-%H.txt')
-        com_path = fn_time.strftime('./data/graph/%Y-%m-%d-%H.txt')
+    for fn in glob.glob(f'/scratch/kahrab/github-graph/data/events/{year}/*.json'):
+        fn_time = datetime.strptime(fn, f'/scratch/kahrab/github-graph/data/events/{year}/%Y-%m-%d-%H.json')
+        inc_path = fn_time.strftime(f'./data/graph/{year}/_%Y-%m-%d-%H.txt')
+        com_path = fn_time.strftime(f'./data/graph/{year}/%Y-%m-%d-%H.txt')
         if fn_time.timetuple().tm_yday % total != part or os.path.exists(com_path):
             continue
         with open(fn, 'r') as fr:
@@ -98,11 +98,12 @@ def build(total, part):
 
 
 def main():
+    year = int(os.getenv('YEAR', '2019'))
     total_threads = int(os.getenv('TOTAL_THREADS', '36'))
     task_id = int(os.getenv('SLURM_ARRAY_TASK_ID', '-1'))
     ts = []
     for i in range(task_id * 2, (task_id + 1) * 2):
-        t = Thread(target=build, args=(total_threads, i))
+        t = Thread(target=build, args=(year, total_threads, i))
         t.start()
         ts.append(t)
     for t in ts:
