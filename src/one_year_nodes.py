@@ -50,7 +50,7 @@ def bfs(g, root):
     while not q.empty():
         v = q.get()
         for u in g[v] - vs:
-            if re.match('\/(.*?)\/', u).groups()[0] != 'user':
+            if re.match('\/(.*?)\/', u).groups()[0] not in ['user', 'repo']:
                 q.put(u)
             vs.add(u)
     return dict(Counter(list(map(lambda x: re.match('\/(.*?)\/', x).groups()[0], vs))))
