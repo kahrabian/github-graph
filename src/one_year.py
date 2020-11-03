@@ -8,8 +8,8 @@ from threading import Lock, Thread
 
 
 def _graph(g, lk, trd_cnt, prt):
-    for fn in glob.glob('./data/graph/*.txt'):
-        if datetime.strptime(fn, './data/graph/%Y-%m-%d-%H.txt').toordinal() % trd_cnt != prt:
+    for fn in glob.glob('./data/graph/*/*.txt'):
+        if datetime.strptime(fn.split('/')[-1], '%Y-%m-%d-%H.txt').toordinal() % trd_cnt != prt:
             continue
         with open(fn, 'r') as f:
             for l in f.readlines():
@@ -53,8 +53,8 @@ def bfs(g, root):
 
 
 def _build(vs, p, trd_cnt, prt):
-    for fn in glob.glob('./data/graph/*.txt'):
-        fn_tm = datetime.strptime(fn, './data/graph/%Y-%m-%d-%H.txt')
+    for fn in glob.glob('./data/graph/*/*.txt'):
+        fn_tm = datetime.strptime(fn.split('/')[-1], '%Y-%m-%d-%H.txt')
         inc_pth = fn_tm.strftime(f'./data/{p}/%Y-%m-%d-%H_.txt')
         com_pth = fn_tm.strftime(f'./data/{p}/%Y-%m-%d-%H.txt')
         if os.path.exists(com_pth) or fn_tm.toordinal() % trd_cnt != prt:
@@ -102,16 +102,23 @@ if __name__ == '__main__':
         dump(g_p, g)
     print(f'graph size: {len(g)}')
 
-    for i, v in enumerate(g.keys()):
-        if re.match('\/(.*?)\/', v).groups()[0] != 'repo':
-            continue
-        p = v.split('/')[-1]
+    roots = {
+        'kubernetes/kubernetes': '/repo/20580498',
+        'ansible/ansible': '/repo/3638964',
+        'elastic/kibana': '/repo/7833168',
+        'dotnet/corefx': '/repo/26295345',
+        'cockroachdb/cockroach': '/repo/16563587',
+        'dotnet/roslyn': '/repo/29078997',
+        'saltstack/salt': '/repo/1390248',
+    }
+    for fn, v in roots.items():
+        p = fn.replace('/', '_')
         vs_p = f'./data/tmp/vs_{p}.pkl'
         if os.path.exists(vs_p):
             vs = load(vs_p)
         else:
             vs = bfs(g, v)
             dump(vs_p, vs)
-        print(f'[{i}], sample node size {p}: {len(vs)}')
+        print(f'sample node size {p}: {len(vs)}')
 
         build(vs, p, trd_cnt)
