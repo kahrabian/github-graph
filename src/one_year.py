@@ -8,20 +8,20 @@ from threading import Lock, Thread
 
 
 def _graph(g, lk, trd_cnt, prt):
-    for fn in glob.glob('./data/graph/*/*.txt'):
+    for fn in glob.glob('./data/graph/20*/*.txt'):
         if datetime.strptime(fn.split('/')[-1], '%Y-%m-%d-%H.txt').toordinal() % trd_cnt != prt:
             continue
         with open(fn, 'r') as f:
             for l in f.readlines():
-                v1, v2, r, _ = l.split('\t')
+                tup = l.split('\t')
                 with lk:
-                    if v1 not in g:
-                        g[v1] = set()
-                    g[v1].add(v2)
+                    if tup[0] not in g:
+                        g[tup[0]] = set()
+                    g[tup[0]].add(tup[1])
                 with lk:
-                    if v2 not in g:
-                        g[v2] = set()
-                    g[v2].add(v1)
+                    if tup[1] not in g:
+                        g[tup[1]] = set()
+                    g[tup[1]].add(tup[0])
 
 
 def graph(trd_cnt):
@@ -62,9 +62,9 @@ def _build(vs, p, trd_cnt, prt):
         with open(fn, 'r') as fr:
             with open(inc_pth, 'w') as fw:
                 for l in fr.readlines():
-                    v1, v2, r, t = l.strip().split('\t')
-                    if v1 in vs and v2 in vs:
-                        fw.write(f'{v1}\t{r}\t{v2}\t{t}\n')
+                    tup = l.split('\t')
+                    if tup[0] in vs and tup[1] in vs:
+                        fw.write(f'{tup[0]}\t{tup[2]}\t{tup[1]}\t{tup[3]}\n')
         os.rename(inc_pth, com_pth)
 
 
