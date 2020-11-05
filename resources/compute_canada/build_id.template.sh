@@ -11,6 +11,5 @@
 
 module load python/3
 
-export YEAR=2015
 export TOTAL_THREADS=72
 python src/build_id.py

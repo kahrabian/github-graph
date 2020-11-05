@@ -6,8 +6,8 @@ from threading import Thread
 
 
 def build(total, part):
-    for fn in glob.glob('./data/events/*.json'):
-        fn_time = datetime.strptime(fn, './data/events/%Y-%m-%d-%H.json')
+    for fn in glob.glob('/scratch/kahrab/github-graph/data/events/*/*.json'):
+        fn_time = datetime.strptime(fn.split('/')[-1], '%Y-%m-%d-%H.json')
         inc_path = fn_time.strftime('./data/pr/_%Y-%m-%d-%H.txt')
         com_path = fn_time.strftime('./data/pr/%Y-%m-%d-%H.txt')
         if fn_time.timetuple().tm_yday % total != part or os.path.exists(com_path):
