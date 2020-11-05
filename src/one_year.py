@@ -14,6 +14,8 @@ def _graph(g, lk, trd_cnt, prt):
         with open(fn, 'r') as f:
             for l in f.readlines():
                 tup = l.split('\t')
+                if tup[2] in ['U_W_R', 'U_P_R', 'U_A_R']:
+                    continue
                 with lk:
                     if tup[0] not in g:
                         g[tup[0]] = set()
@@ -46,7 +48,7 @@ def bfs(g, root):
     while not q.empty():
         v = q.get()
         for u in g[v] - vs:
-            if re.match('\/(.*?)\/', u).groups()[0] != 'user':
+            if re.match('\/(.*?)\/', u).groups()[0] not in ['user', 'repo']:
                 q.put(u)
             vs.add(u)
     return vs
