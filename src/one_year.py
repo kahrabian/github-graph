@@ -13,7 +13,7 @@ def _graph(g, lk, trd_cnt, prt):
             continue
         with open(fn, 'r') as f:
             for l in f.readlines():
-                tup = l.split('\t')
+                tup = l.strip().split('\t')
                 if tup[2] in ['U_W_R', 'U_P_R', 'U_A_R']:
                     continue
                 with lk:
@@ -64,7 +64,7 @@ def _build(vs, p, trd_cnt, prt):
         with open(fn, 'r') as fr:
             with open(inc_pth, 'w') as fw:
                 for l in fr.readlines():
-                    tup = l.split('\t')
+                    tup = l.strip().split('\t')
                     if tup[0] in vs and tup[1] in vs:
                         fw.write(f'{tup[0]}\t{tup[2]}\t{tup[1]}\t{tup[3]}\n')
         os.rename(inc_pth, com_pth)
@@ -101,17 +101,27 @@ if __name__ == '__main__':
         g = load(g_p)
     else:
         g = graph(trd_cnt)
-        dump(g_p, g)
+        # dump(g_p, g)
     print(f'graph size: {len(g)}')
 
+    _vs = set()
     roots = {
         'kubernetes/kubernetes': '/repo/20580498',
         'ansible/ansible': '/repo/3638964',
         'elastic/kibana': '/repo/7833168',
+        'ceph/ceph': '/repo/2310495',
+        'apple/swift': '/repo/44838949',
+        'tgstation/tgstation': '/repo/3234987',
+        'rust-lang/rust': '/repo/724712',
+        'elastic/elasticsearch': '/repo/507775',
+        'apache/spark': '/repo/17165658',
         'dotnet/corefx': '/repo/26295345',
-        'cockroachdb/cockroach': '/repo/16563587',
-        'dotnet/roslyn': '/repo/29078997',
         'saltstack/salt': '/repo/1390248',
+        'cockroachdb/cockroach': '/repo/16563587',
+        'dimagi/commcare-hq': '/repo/247278',
+        'cms-sw/cmssw': '/repo/10969551',
+        'nodejs/node': '/repo/27193779',
+        'dotnet/roslyn': '/repo/29078997',
     }
     for fn, v in roots.items():
         p = fn.replace('/', '_')
@@ -121,6 +131,7 @@ if __name__ == '__main__':
         else:
             vs = bfs(g, v)
             dump(vs_p, vs)
+        _vs = _vs.union(vs)
         print(f'sample node size {p}: {len(vs)}')
 
-        build(vs, p, trd_cnt)
+    build(_vs, 'all_all', trd_cnt)
