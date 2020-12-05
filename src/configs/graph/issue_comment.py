@@ -29,7 +29,7 @@ config = {
                     },
                 },
                 'e': {
-                    'type': 'U_C_IC',
+                    'type': 'IC_C_I',
                     'features': [
                         'created_at',
                     ],
