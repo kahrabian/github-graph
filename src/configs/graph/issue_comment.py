@@ -21,6 +21,26 @@ config = {
                     },
                 },
             },
+            {
+                'v1': {
+                    'type': 'issue_comment',
+                    'features': {
+                        'id': 'payload.comment.id',
+                    },
+                },
+                'e': {
+                    'type': 'U_C_IC',
+                    'features': [
+                        'created_at',
+                    ],
+                },
+                'v2': {
+                    'type': 'issue',
+                    'features': {
+                        'id': 'payload.issue.id',
+                    },
+                },
+            },
         ],
     },
 }
