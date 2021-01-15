@@ -34,12 +34,7 @@ config = {
                     },
                 },
                 'e': {
-                    'type': {
-                        'opened': 'I_O_R',
-                        'closed': 'I_C_R',
-                        'reopened': 'I_RO_R',
-                    },
-                    'type_field': 'payload.action',
+                    'type': 'I_R',
                     'features': [
                         'created_at',
                     ],

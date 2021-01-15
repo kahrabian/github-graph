@@ -9,27 +9,7 @@ config = {
                     },
                 },
                 'e': {
-                    'type': 'U_C_IC',
-                    'features': [
-                        'created_at',
-                    ],
-                },
-                'v2': {
-                    'type': 'issue_comment',
-                    'features': {
-                        'id': 'payload.comment.id',
-                    },
-                },
-            },
-            {
-                'v1': {
-                    'type': 'issue_comment',
-                    'features': {
-                        'id': 'payload.comment.id',
-                    },
-                },
-                'e': {
-                    'type': 'IC_C_I',
+                    'type': 'U_CO_I',
                     'features': [
                         'created_at',
                     ],

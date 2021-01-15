@@ -4,25 +4,19 @@ import os
 from datetime import datetime
 from threading import Thread
 
-from configs.graph import issue_comment as cfg_issue_comment
-from configs.graph import issues as cfg_issues
-from configs.graph import member as cfg_member
-from configs.graph import pull_request_review_comment as cfg_pull_request_review_comment
-from configs.graph import pull_request as cfg_pull_request
-from configs.graph import push as cfg_push
-from configs.graph import schema as cfg_schema
-from configs.graph import watch as cfg_watch
+from src.configs.graph import issue_comment as cfg_issue_comment
+from src.configs.graph import issues as cfg_issues
+from src.configs.graph import pull_request_review_comment as cfg_pull_request_review_comment
+from src.configs.graph import pull_request as cfg_pull_request
+from src.configs.graph import schema as cfg_schema
 
 
 def get_config():
     config = {}
     config.update(cfg_issue_comment.config)
     config.update(cfg_issues.config)
-    config.update(cfg_member.config)
     config.update(cfg_pull_request_review_comment.config)
     config.update(cfg_pull_request.config)
-    config.update(cfg_push.config)
-    config.update(cfg_watch.config)
 
     return config
 

@@ -17,7 +17,6 @@ config = {
                     'type_field': 'payload.action',
                     'features': [
                         'created_at',
-                        'payload.pull_request.merged'
                     ],
                 },
                 'v2': {
@@ -35,15 +34,9 @@ config = {
                     },
                 },
                 'e': {
-                    'type': {
-                        'opened': 'P_O_R',
-                        'closed': 'P_C_R',
-                        'reopened': 'P_R_R',
-                    },
-                    'type_field': 'payload.action',
+                    'type': 'P_R',
                     'features': [
                         'created_at',
-                        'payload.pull_request.merged'
                     ],
                 },
                 'v2': {
