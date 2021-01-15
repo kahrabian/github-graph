@@ -8,14 +8,12 @@ from threading import Lock, Thread
 
 
 def _graph(g, lk, trd_cnt, prt):
-    for fn in glob.glob('./data/graph/20*/*.txt'):
+    for fn in glob.glob('./data/graph/*/*.txt'):
         if datetime.strptime(fn.split('/')[-1], '%Y-%m-%d-%H.txt').toordinal() % trd_cnt != prt:
             continue
         with open(fn, 'r') as f:
             for l in f.readlines():
                 tup = l.strip().split('\t')
-                if tup[2] in ['U_W_R', 'U_P_R', 'U_A_R']:
-                    continue
                 with lk:
                     if tup[0] not in g:
                         g[tup[0]] = set()
@@ -101,27 +99,27 @@ if __name__ == '__main__':
         g = load(g_p)
     else:
         g = graph(trd_cnt)
-        # dump(g_p, g)
+        dump(g_p, g)
     print(f'graph size: {len(g)}')
 
     _vs = set()
     roots = {
         'kubernetes/kubernetes': '/repo/20580498',
         'ansible/ansible': '/repo/3638964',
-        'elastic/kibana': '/repo/7833168',
+        # 'elastic/kibana': '/repo/7833168',
         'ceph/ceph': '/repo/2310495',
-        'apple/swift': '/repo/44838949',
+        # 'apple/swift': '/repo/44838949',
         'tgstation/tgstation': '/repo/3234987',
-        'rust-lang/rust': '/repo/724712',
-        'elastic/elasticsearch': '/repo/507775',
-        'apache/spark': '/repo/17165658',
-        'dotnet/corefx': '/repo/26295345',
-        'saltstack/salt': '/repo/1390248',
-        'cockroachdb/cockroach': '/repo/16563587',
-        'dimagi/commcare-hq': '/repo/247278',
-        'cms-sw/cmssw': '/repo/10969551',
-        'nodejs/node': '/repo/27193779',
-        'dotnet/roslyn': '/repo/29078997',
+        # 'rust-lang/rust': '/repo/724712',
+        # 'elastic/elasticsearch': '/repo/507775',
+        # 'apache/spark': '/repo/17165658',
+        # 'dotnet/corefx': '/repo/26295345',
+        # 'saltstack/salt': '/repo/1390248',
+        # 'cockroachdb/cockroach': '/repo/16563587',
+        # 'dimagi/commcare-hq': '/repo/247278',
+        # 'cms-sw/cmssw': '/repo/10969551',
+        # 'nodejs/node': '/repo/27193779',
+        # 'dotnet/roslyn': '/repo/29078997',
     }
     for fn, v in roots.items():
         p = fn.replace('/', '_')

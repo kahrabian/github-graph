@@ -4,11 +4,11 @@ import os
 from datetime import datetime
 from threading import Thread
 
-from src.configs.graph import issue_comment as cfg_issue_comment
-from src.configs.graph import issues as cfg_issues
-from src.configs.graph import pull_request_review_comment as cfg_pull_request_review_comment
-from src.configs.graph import pull_request as cfg_pull_request
-from src.configs.graph import schema as cfg_schema
+from configs.graph import issue_comment as cfg_issue_comment
+from configs.graph import issues as cfg_issues
+from configs.graph import pull_request_review_comment as cfg_pull_request_review_comment
+from configs.graph import pull_request as cfg_pull_request
+from configs.graph import schema as cfg_schema
 
 
 def get_config():
