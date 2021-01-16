@@ -12,7 +12,7 @@ config = {
                     'type': {
                         'opened': 'U_O_I',
                         'closed': 'U_C_I',
-                        'reopened': 'U_RO_I',
+                        'reopened': 'U_R_I',
                     },
                     'type_field': 'payload.action',
                     'features': [
