@@ -55,7 +55,7 @@ def extract(tups, prj):
     for i in range(1, 60):
         if i not in dm:
             continue
-        cont, intg = {}, {}
+        cont, intg = {}, set()
         x += dm[i]
         for z in x + dm[i + 1]:
             if z[1] == 'U_O_P':
